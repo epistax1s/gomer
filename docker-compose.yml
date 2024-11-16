@@ -1,0 +1,10 @@
+services:
+  gomer:
+    build: .
+    image: gomer:latest
+    container_name: gomer-container
+    restart: always
+    volumes: 
+      - ./config:/app/config
+      - ./database:/app/database
+      - ./log:/app/log

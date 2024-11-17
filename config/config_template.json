@@ -1,7 +1,7 @@
 {
     "report" : {
-        "notificationCron" : "",
-        "publishCron": ""
+        "notificationCron" : "20 9 * * *",
+        "publishCron": "0 11 * * *"
     },
     "bot" : {
         "token": ""

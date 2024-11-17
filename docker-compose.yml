@@ -8,3 +8,5 @@ services:
       - ./config:/app/config
       - ./database:/app/database
       - ./log:/app/log
+    environment:
+      - TZ=Asia/Krasnoyarsk

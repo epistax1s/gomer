@@ -10,9 +10,12 @@ import (
 
 func main() {
 	server := server.InitServer()
+	
 	state.InitStateMachine()
-	report.StartCron(server)
 
+	report.StartNotification(server)
+	report.StartPublish(server)
+	
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 60
 

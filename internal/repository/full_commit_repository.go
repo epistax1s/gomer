@@ -27,7 +27,8 @@ func (repo *fullCommitRepository) FindAllByDate(date *database.Date) ([]model.Fu
 	result := repo.db.Raw(`
 		SELECT 
 			us.name, 
-			us.username, 
+			us.username,
+			us.chat_id, 
 			dp.id as department_id, 
 			dp.department_name, 
 			CASE 
@@ -38,7 +39,7 @@ func (repo *fullCommitRepository) FindAllByDate(date *database.Date) ([]model.Fu
 		FROM "tg_user" us
 		JOIN "department" dp ON us.department_id = dp.id
 		LEFT JOIN "commit" cm ON us.id = cm.user_id AND cm.commit_date = @commit_date
-		WHERE us.status = @user_status;
+		WHERE us.status = @user_status
 	`, sql.Named("commit_date", date), sql.Named("user_status", model.UserStatusActive)).Scan(&fullCommits)
 
 	return fullCommits, result.Error

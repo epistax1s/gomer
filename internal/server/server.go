@@ -11,13 +11,13 @@ import (
 )
 
 type Server struct {
-	UserService   service.UserService
-	CommitService service.CommitService
-	DepartService service.DepartService
-	GroupService  service.GroupService
-	ReportService service.FullCommitService
-	Config        *config.Config
-	Gomer         *gomer.Gomer
+	UserService       service.UserService
+	CommitService     service.CommitService
+	DepartService     service.DepartService
+	GroupService      service.GroupService
+	FullCommitService service.FullCommitService
+	Config            *config.Config
+	Gomer             *gomer.Gomer
 }
 
 func InitServer() *Server {
@@ -59,12 +59,12 @@ func InitServer() *Server {
 		repository.NewFullCommit(database))
 
 	return &Server{
-		UserService:   userService,
-		CommitService: commitService,
-		DepartService: departService,
-		GroupService:  groupService,
-		ReportService: reportService,
-		Config:        config,
-		Gomer:         gomer,
+		UserService:       userService,
+		CommitService:     commitService,
+		DepartService:     departService,
+		GroupService:      groupService,
+		FullCommitService: reportService,
+		Config:            config,
+		Gomer:             gomer,
 	}
 }

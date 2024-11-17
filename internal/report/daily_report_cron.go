@@ -10,14 +10,14 @@ import (
 	"github.com/epistax1s/gomer/internal/server"
 )
 
-func StartCron(server *server.Server) {
-	c := cron.New(cron.WithSeconds())
+func StartPublish(server *server.Server) {
+	c := cron.New()
 	c.AddFunc(server.Config.Report.PublishCron, func() {
 		now := time.Now()
 		if !isBusinessDay(&now) {
 			log.Info(
 				"today is not a business day. The report will not be generated",
-				"action", "report cron")
+				"action", "report publish cron")
 
 			return
 		}

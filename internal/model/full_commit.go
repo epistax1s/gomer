@@ -3,6 +3,7 @@ package model
 type FullCommit struct {
 	Name           string `gorm:"column:name"`
 	Username       string `gorm:"column:username"`
+	ChatID         int64  `gorm:"column:chat_id"`
 	DepartmentID   int64  `gorm:"column:department_id"`
 	DepartmentName string `gorm:"column:department_name"`
 	CommitSent     bool   `gorm:"column:commit_sent"`

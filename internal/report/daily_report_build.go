@@ -14,7 +14,7 @@ import (
 )
 
 func BuildDailyReport(server *server.Server, date *database.Date) error {
-	reports, err := server.ReportService.FindAllByDate(date)
+	reports, err := server.FullCommitService.FindAllByDate(date)
 	if err != nil {
 		log.Error(
 			"errors in Compiling the daily report",

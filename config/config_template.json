@@ -1,0 +1,13 @@
+{
+    "report" : {
+        "notificationCron" : "20 9 * * *",
+        "publishCron": "0 11 * * *"
+    },
+    "bot" : {
+        "token": ""
+    },
+    "log" : {
+        "level" : "debug",
+        "stdout" : true
+    }
+}

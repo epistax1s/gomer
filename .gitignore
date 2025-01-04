@@ -1,0 +1,38 @@
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# env file
+.env
+
+# Visual Studio Code 
+*.code-workspace
+.vscode/
+
+# Bot config (n this case, the config_template should be visible to everyone)
+config/config.json
+
+# Logs (storing logs in the project structure is convenient for development)
+log/*.log
+
+# SQLite Database (storing the database in the project structure is convenient for development)
+database/gomer.db

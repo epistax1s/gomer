@@ -1,10 +1,9 @@
 package interceptor
 
 import (
-	"strconv"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
+	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/server"
 	"github.com/epistax1s/gomer/internal/state"
@@ -34,14 +33,17 @@ func handleFromPrivate(server *server.Server, update *tgbotapi.Update) {
 
 func handleFromGroup(server *server.Server, update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
+	title := update.FromChat().Title
+
 	cmd := update.Message.Command()
 
 	if cmd == "link" {
-		err := server.GroupService.LinkGroup(update.FromChat().ID)
+		err := server.GroupService.LinkGroup(chatID, title)
 		if err == nil {
-			log.Info("ok we added this group to report target, msg.From.ID=", chatID)
-			rmsg := tgbotapi.NewMessage(chatID, "ok we added this group to report target, msg.From.ID = "+strconv.FormatInt(chatID, 10))
-			server.Gomer.Send(rmsg)
+			log.Info("a new group has been assigned to the bot",
+				"chatID", chatID, "title", title)
+
+			server.Gomer.SendMessage(chatID, i18n.Localize("groupSuccessfullyLinked"))
 		}
 	}
 }

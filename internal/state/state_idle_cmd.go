@@ -53,14 +53,20 @@ func buildHelpResponse(isTracked bool) string {
 			"/help		- %s\n"+
 			"/commit 	- %s\n"+
 			"/modify	- %s\n"+
-			"/untrack	- %s",
+			"/untrack	- %s\n"+
+			"/cancel	- %s",
 			i18n.Localize("helpDescription"), i18n.Localize("commitDescription"),
-			i18n.Localize("modifyDescription"), i18n.Localize("untrackDescription"))
+			i18n.Localize("modifyDescription"), i18n.Localize("untrackDescription"),
+			i18n.Localize("cancelDescription"),
+		)
 	} else {
 		return fmt.Sprintf(""+
-			"/help	- %s\n"+
-			"/track	- %s",
-			i18n.Localize("helpDescription"), i18n.Localize("trackDescription"))
+			"/help		- %s\n"+
+			"/track		- %s\n"+
+			"/cancel	- %s",
+			i18n.Localize("helpDescription"), i18n.Localize("trackDescription"),
+			i18n.Localize("cancelDescription"),
+		)
 	}
 }
 

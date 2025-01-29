@@ -1,11 +1,9 @@
 package state
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
+	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
+	"github.com/epistax1s/gomer/internal/model"
 	"github.com/epistax1s/gomer/internal/server"
 	callback "github.com/epistax1s/gomer/internal/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,117 +20,139 @@ func NewAdminGroupState(data *StateContext) State {
 }
 
 const (
-	PAGE_SIZE    = 5
-	BTN_PREV     = "<"
-	BTN_NEXT     = ">"
-	PREV_PREFIX  = "prev_"
-	NEXT_PREFIX  = "next_"
-	GROUP_PREFIX = "group_"
-	MENU         = "menu"
+	PAGE_SIZE = 5
 )
 
-type callbackHandler func(*server.Server, *tgbotapi.CallbackQuery)
+type agCallbackHandler func(*server.Server, *tgbotapi.Update, callback.Callback)
 
-// TODO rename
-var callbacHandlers = map[string]callbackHandler{
-	callback.AGPrev:   prevHandler,
-	callback.AGNext:   nextHandler,
-	callback.AGSelect: groupSelectHandler,
-	callback.AGUnlink: groupUnlinkHandler,
-}
-
-func prevHandler(server *server.Server, query *tgbotapi.CallbackQuery) {
-
-}
-
-func nextHandler(server *server.Server, query *tgbotapi.CallbackQuery) {
-
-}
-
-func groupSelectHandler(server *server.Server, query *tgbotapi.CallbackQuery) {
-
-}
-
-func groupUnlinkHandler(server *server.Server, query *tgbotapi.CallbackQuery) {
-
+var agCallbacHandlers = map[string]agCallbackHandler{
+	callback.AG_PREV:       prevHandler,
+	callback.AG_NEXT:       nextHandler,
+	callback.AG_SELECT:     groupSelectHandler,
+	callback.AG_UNLINK:     groupUnlinkHandler,
+	callback.AG_GROUP_LIST: groupListHandler,
+	callback.EXIT:          exitHandler,
 }
 
 func (state *AdminGroupState) Init(server *server.Server, update *tgbotapi.Update) {
-	keyboard, err := generateGroupsKeyboard(server, 1)
+	chatID := update.FromChat().ID
+
+	keyboard, err := genGroupListKeyboard(server, 1)
 	if err != nil {
-		log.Error(err.Error())
+		log.Error("group management / init - group list rendering errors",
+			"chatID", chatID, "page", err.Error())
+
+		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		return
 	}
-	server.Gomer.SendMessageWithKeyboard(update.FromChat().ID, "Группы", keyboard)
+
+	server.Gomer.SendMessageWithKeyboard(update.FromChat().ID, i18n.Localize("adminGroupManagementTitle"), keyboard)
 }
 
 func (state *AdminGroupState) Handle(server *server.Server, update *tgbotapi.Update) {
-	if update.CallbackQuery != nil {
-		jsonData := update.CallbackQuery.Data
-		data, err := callback.Decode(jsonData)
+	chatID := update.FromChat().ID
+	query := update.CallbackQuery
+
+	if query != nil {
+		queryData := query.Data
+		callback, err := callback.Decode(queryData)
 		if err != nil {
 			log.Error(err.Error())
 		}
-
-		callbacHandlers[]
-
+		agCallbacHandlers[callback.GetType()](server, update, callback)
 	} else {
-		log.Error("ERROR")
+		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
 	}
 }
 
-func handleNavigationBtn(server *server.Server, callback *tgbotapi.CallbackQuery, prefix string) {
-	page, err := parseCallbackInt(callback.Data, prefix)
-	if err != nil {
-		log.Error(err.Error())
-	}
+func prevHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+	prevCallback := c.(*callback.AGPrevCallback)
+	page := prevCallback.Page
 
-	keyboard, err := generateGroupsKeyboard(server, page)
-	if err != nil {
-		log.Error(err.Error())
-	}
-
-	server.Gomer.EditMessageWithKeyboard(callback.From.ID, callback.Message.MessageID, "Группы", keyboard)
+	renderGroupListKeyboard(server, update, page)
 }
 
-func handleSelectGroup(server *server.Server, callback *tgbotapi.CallbackQuery) {
-	groupID, err := parseCallbackInt(callback.Data, GROUP_PREFIX)
-	log.Info("handleSelectGroup", "groupID", groupID)
-	if err != nil {
-		log.Error(err.Error())
-	}
+func nextHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+	nextCallback := c.(*callback.AGNextCallback)
+	page := nextCallback.Page
 
-	var keyboard tgbotapi.InlineKeyboardMarkup
-
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Отвязать группу", "unlink"),
-	))
-
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("К списку групп", "back"),
-	))
-
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("В главное меню", MENU),
-	))
-
-	// err
-	group, _ := server.GroupService.FindByID(int64(groupID))
-	log.Info("group", "group", group)
-
-	server.Gomer.EditMessageWithKeyboard(
-		callback.From.ID,
-		callback.Message.MessageID,
-		"Вы выбрали группу"+group.Title+"\nВы можете удалить группу или покинуть данное меню",
-		&keyboard)
+	renderGroupListKeyboard(server, update, page)
 }
 
-func handleMenuBtn(server *server.Server, update *tgbotapi.Update) {
+func groupSelectHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+	selectCallback := c.(*callback.AGSelectCallback)
+
+	page := selectCallback.Page
+	groupID := selectCallback.GroupID
+
+	chatID := update.CallbackQuery.From.ID
+
+	group, err := server.GroupService.FindByID(int64(groupID))
+	if err != nil {
+		log.Error("group management, error handling the groupSelect button, group not found",
+			"groupID", groupID, "callback", c, "err", err.Error())
+
+		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		return
+	}
+
+	renderGroupControlKeyboard(server, update, page, group)
+}
+
+func groupUnlinkHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+	// TODO think about and implement group unlinking
+	log.Info("groupUnlinkHandler dummy ", "callback", c)
+}
+
+func groupListHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+	groupListCallback := c.(*callback.AGGroupListCallback)
+	page := groupListCallback.Page
+
+	renderGroupListKeyboard(server, update, page)
+}
+
+func exitHandler(server *server.Server, update *tgbotapi.Update, callback callback.Callback) {
+	chatID := update.CallbackQuery.From.ID
 	StateMachine.
-		Set(Idle, update.FromChat().ID, &StateContext{}).
+		Set(Idle, chatID, &StateContext{}).
 		Init(server, update)
+
+	server.Gomer.RemoveMarkup(update.CallbackQuery)
 }
 
-func generateGroupsKeyboard(server *server.Server, page int) (*tgbotapi.InlineKeyboardMarkup, error) {
+func renderGroupListKeyboard(server *server.Server, update *tgbotapi.Update, page int) {
+	chatID := update.CallbackQuery.From.ID
+	messageID := update.CallbackQuery.Message.MessageID
+
+	keyboard, err := genGroupListKeyboard(server, page)
+	if err != nil {
+		log.Error("group management - group list rendering errors",
+			"chatID", chatID, "page", page, "err", err.Error())
+
+		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		return
+	}
+
+	server.Gomer.EditMessageWithKeyboard(chatID, messageID, i18n.Localize("adminGroupManagementTitle"), keyboard)
+}
+
+func renderGroupControlKeyboard(server *server.Server, update *tgbotapi.Update, page int, group *model.Group) {
+	chatID := update.CallbackQuery.From.ID
+	messageID := update.CallbackQuery.Message.MessageID
+
+	keyboard, err := genGroupControlKeyboard(page, int(group.ID))
+	if err != nil {
+		log.Error("group management - group control rendering errors",
+			"chatID", chatID, "page", page, "groupID", int(group.ID), "err", err.Error())
+
+		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		return
+	}
+
+	server.Gomer.EditMessageWithKeyboard(chatID, messageID, group.Title, keyboard)
+}
+
+func genGroupListKeyboard(server *server.Server, page int) (*tgbotapi.InlineKeyboardMarkup, error) {
 	groups, err := server.GroupService.FindPaginated(page, PAGE_SIZE)
 	if err != nil {
 		return &tgbotapi.InlineKeyboardMarkup{}, err
@@ -146,22 +166,36 @@ func generateGroupsKeyboard(server *server.Server, page int) (*tgbotapi.InlineKe
 	var keyboard tgbotapi.InlineKeyboardMarkup
 
 	for _, group := range groups {
-		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(group.Title, GROUP_PREFIX+strconv.Itoa(int(group.ID))),
-		))
+		callbackData := callback.NewAGSelectCallback(page, int(group.ID))
+		keyboard.InlineKeyboard = append(
+			keyboard.InlineKeyboard,
+			tgbotapi.NewInlineKeyboardRow(
+				tgbotapi.NewInlineKeyboardButtonData(group.Title, callbackData),
+			),
+		)
 	}
 
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("В главное меню", MENU)))
+	exitCallbackData := callback.NewExitCallback()
+	keyboard.InlineKeyboard = append(
+		keyboard.InlineKeyboard,
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData(i18n.Localize("exit"), exitCallbackData),
+		),
+	)
 
 	navigation := tgbotapi.NewInlineKeyboardRow()
-
 	if page > 1 {
-		navigation = append(navigation, tgbotapi.NewInlineKeyboardButtonData(BTN_PREV, PREV_PREFIX+strconv.Itoa(page-1)))
+		callbackData := callback.NewAGPrevCallback(page - 1)
+		navigation = append(
+			navigation,
+			tgbotapi.NewInlineKeyboardButtonData(i18n.Localize("adminGroupManagementPrev"), callbackData))
 	}
 
 	if groupCount > int64(page)*PAGE_SIZE {
-		navigation = append(navigation, tgbotapi.NewInlineKeyboardButtonData(BTN_NEXT, NEXT_PREFIX+strconv.Itoa(page+1)))
+		callbackData := callback.NewAGNextCallback(page + 1)
+		navigation = append(
+			navigation,
+			tgbotapi.NewInlineKeyboardButtonData(i18n.Localize("adminGroupManagementNext"), callbackData))
 	}
 
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, navigation)
@@ -169,20 +203,23 @@ func generateGroupsKeyboard(server *server.Server, page int) (*tgbotapi.InlineKe
 	return &keyboard, nil
 }
 
-func parseCallbackInt(data string, prefix string) (int, error) {
-	parts := strings.Split(data, prefix)
-	if len(parts) > 1 {
-		return strconv.Atoi(parts[1])
-	} else {
-		return 0, fmt.Errorf("")
-	}
-}
+func genGroupControlKeyboard(page int, groupID int) (*tgbotapi.InlineKeyboardMarkup, error) {
+	var keyboard tgbotapi.InlineKeyboardMarkup
 
-/* func parseCallbackString(data string, prefix string) (string, error) {
-	parts := strings.Split(data, prefix)
-	if len(parts) > 1 {
-		return parts[1], nil
-	} else {
-		return "", fmt.Errorf("")
-	}
-} */
+	unlinkCallbackData := callback.NewAGUnlinkCallback(groupID)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(i18n.Localize("adminGroupManagementUnlink"), unlinkCallbackData),
+	))
+
+	backCallbackData := callback.NewAGGroupListCallback(page)
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(i18n.Localize("adminGroupManagementGroupList"), backCallbackData),
+	))
+
+	exitCallbackData := callback.NewExitCallback()
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData(i18n.Localize("exit"), exitCallbackData),
+	))
+
+	return &keyboard, nil
+}

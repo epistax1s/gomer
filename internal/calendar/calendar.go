@@ -5,32 +5,33 @@ import (
 	"strconv"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
 	"github.com/epistax1s/gomer/internal/database"
+
+	callback "github.com/epistax1s/gomer/internal/utils"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 const (
-	BTN_PREV = "<"
-	BTN_NEXT = ">"
+	BTN_PREV        = "<"
+	BTN_NEXT        = ">"
 	BTN_PREV_PREFIX = "prev_"
 	BTN_NEXT_PREFIX = "next_"
 )
 
 var daysOfWeek = [7]string{"Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"}
 
-func GenerateCalendar(year int, month time.Month) tgbotapi.InlineKeyboardMarkup {
+func GenerateCalendar(year int, month time.Month) *tgbotapi.InlineKeyboardMarkup {
 	var keyboard tgbotapi.InlineKeyboardMarkup
 
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, generateMonthYearRow(year, month))
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, generateDaysNamesRow())
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, generateDaysInMonth(year, month)...)
-	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, generateNavigationButtons())
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, generateNavigationButtons(year, month))
 
-	return keyboard
+	return &keyboard
 }
 
-func HandlePrevButton(year int, month time.Month) (tgbotapi.InlineKeyboardMarkup, int, time.Month) {
+func HandlePrevButton(year int, month time.Month) (*tgbotapi.InlineKeyboardMarkup, int, time.Month) {
 	if month == time.January {
 		year--
 		month = time.December
@@ -40,7 +41,7 @@ func HandlePrevButton(year int, month time.Month) (tgbotapi.InlineKeyboardMarkup
 	return GenerateCalendar(year, month), year, month
 }
 
-func HandleNextButton(year int, month time.Month) (tgbotapi.InlineKeyboardMarkup, int, time.Month) {
+func HandleNextButton(year int, month time.Month) (*tgbotapi.InlineKeyboardMarkup, int, time.Month) {
 	if month == time.December {
 		year++
 		month = time.January
@@ -50,9 +51,9 @@ func HandleNextButton(year int, month time.Month) (tgbotapi.InlineKeyboardMarkup
 	return GenerateCalendar(year, month), year, month
 }
 
-func HandleButtonData(buttonData string) (*database.Date, error) {
+func HandleButtonData(callbackData string) (*database.Date, error) {
 	layout := "2006-01-02"
-	parsedTime, err := time.Parse(layout, buttonData)
+	parsedTime, err := time.Parse(layout, callbackData)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,8 @@ func generateDaysInMonth(year int, month time.Month) [][]tgbotapi.InlineKeyboard
 		if time.Now().Year() == year && time.Now().Month() == month && time.Now().Day() == day {
 			btnText += "!"
 		}
-		row = append(row, tgbotapi.NewInlineKeyboardButtonData(btnText, fmt.Sprintf("%d-%02d-%02d", year, month, day)))
+		callbackData := callback.NewCalendarDateCallback(fmt.Sprintf("%d-%02d-%02d", year, month, day))
+		row = append(row, tgbotapi.NewInlineKeyboardButtonData(btnText, callbackData))
 
 		if len(row) == 7 {
 			rows = append(rows, row)
@@ -113,9 +115,9 @@ func generateDaysInMonth(year int, month time.Month) [][]tgbotapi.InlineKeyboard
 	return rows
 }
 
-func generateNavigationButtons() []tgbotapi.InlineKeyboardButton {
+func generateNavigationButtons(year int, month time.Month) []tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData(BTN_PREV, BTN_PREV),
-		tgbotapi.NewInlineKeyboardButtonData(BTN_NEXT, BTN_NEXT),
+		tgbotapi.NewInlineKeyboardButtonData(BTN_PREV, callback.NewCalendarPrevCallback(year, month)),
+		tgbotapi.NewInlineKeyboardButtonData(BTN_NEXT, callback.NewCalendarNextCallback(year, month)),
 	)
 }

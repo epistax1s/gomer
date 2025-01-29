@@ -33,13 +33,11 @@ func handleFromPrivate(server *server.Server, update *tgbotapi.Update) {
 }
 
 func handleFromGroup(server *server.Server, update *tgbotapi.Update) {
-	chat := update.FromChat()
-	chatID := chat.ID
-
+	chatID := update.FromChat().ID
 	cmd := update.Message.Command()
 
 	if cmd == "link" {
-		err := server.GroupService.LinkGroup(chatID, chat.Title)
+		err := server.GroupService.LinkGroup(update.FromChat().ID)
 		if err == nil {
 			log.Info("ok we added this group to report target, msg.From.ID=", chatID)
 			rmsg := tgbotapi.NewMessage(chatID, "ok we added this group to report target, msg.From.ID = "+strconv.FormatInt(chatID, 10))

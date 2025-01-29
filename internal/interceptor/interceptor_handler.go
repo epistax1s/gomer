@@ -14,6 +14,10 @@ type HandlerInterceptor struct {
 }
 
 func (i *HandlerInterceptor) Handle(server *server.Server, update *tgbotapi.Update) {
+	if update == nil {
+		return
+	}
+
 	if update.FromChat().IsPrivate() {
 		handleFromPrivate(server, update)
 	} else if update.FromChat().IsGroup() || update.FromChat().IsSuperGroup() {

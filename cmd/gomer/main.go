@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/epistax1s/gomer/internal/handler"
+
 	"github.com/epistax1s/gomer/internal/report"
 	"github.com/epistax1s/gomer/internal/server"
 	"github.com/epistax1s/gomer/internal/state"
+	"github.com/epistax1s/gomer/internal/interceptor"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -21,7 +22,12 @@ func main() {
 
 	updateChan := server.Gomer.GetUpdatesChan(updateConfig)
 
+	chain := interceptor.NewChainBuilder().
+		Add(&interceptor.CancelInterceptor{}).
+		Add(&interceptor.HandlerInterceptor{}).
+		Build()
+
 	for update := range updateChan {
-		handler.HandleUpdate(server, &update)
+		chain.Handle(server, &update)
 	}
 }

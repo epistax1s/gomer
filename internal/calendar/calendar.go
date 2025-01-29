@@ -13,6 +13,8 @@ import (
 const (
 	BTN_PREV = "<"
 	BTN_NEXT = ">"
+	BTN_PREV_PREFIX = "prev_"
+	BTN_NEXT_PREFIX = "next_"
 )
 
 var daysOfWeek = [7]string{"Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"}

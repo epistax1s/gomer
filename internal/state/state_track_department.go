@@ -50,7 +50,7 @@ func (state *TrackDepartmentState) Init(server *server.Server, update *tgbotapi.
 	}
 
 	// send telegram message
-	server.Gomer.SendMessageWithMarkup(chatID, i18n.Localize("chooseDepartmentPromt"), departmentMarkup)
+	server.Gomer.SendMessageWithKeyboard(chatID, i18n.Localize("chooseDepartmentPromt"), &departmentMarkup)
 }
 
 func (state *TrackDepartmentState) Handle(server *server.Server, update *tgbotapi.Update) {

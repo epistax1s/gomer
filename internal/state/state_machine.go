@@ -26,6 +26,7 @@ const (
 	Date            StateType = "date"
 	Commit          StateType = "commit"
 	CommitModify    StateType = "commitModify"
+	AdminGroup      StateType = "adminGroup"
 )
 
 type StateContext struct {
@@ -42,4 +43,5 @@ var statesFactory = map[StateType]func(data *StateContext) State{
 	Date:            NewDateState,
 	Commit:          NewCommitState,
 	CommitModify:    NewCommitModifyState,
+	AdminGroup:      NewAdminGroupState,
 }

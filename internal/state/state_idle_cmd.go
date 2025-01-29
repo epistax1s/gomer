@@ -17,6 +17,7 @@ const (
 	cmdUntrack      = "untrack"
 	cmdCommit       = "commit"
 	cmdCommitModify = "modify"
+	cmdAdminGroup   = "admin_group"
 )
 
 type IdleCmdHandler func(server *server.Server, update *tgbotapi.Update)
@@ -28,6 +29,7 @@ var IdleCmdHandlers = map[string]IdleCmdHandler{
 	cmdUntrack:      untrackHandler,
 	cmdCommit:       commitHandler,
 	cmdCommitModify: commitModifyHandler,
+	cmdAdminGroup:   adminGroupHandler,
 }
 
 func helpHandler(server *server.Server, update *tgbotapi.Update) {
@@ -167,5 +169,15 @@ func commitModifyHandler(server *server.Server, update *tgbotapi.Update) {
 
 	StateMachine.
 		Set(Date, chatID, &StateContext{NextState: CommitModify}).
+		Init(server, update)
+}
+
+func adminGroupHandler(server *server.Server, update *tgbotapi.Update) {
+	chatID := update.FromChat().ID
+
+	// TODO valid
+
+	StateMachine.
+		Set(AdminGroup, chatID, &StateContext{NextState: CommitModify}).
 		Init(server, update)
 }

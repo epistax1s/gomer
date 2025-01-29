@@ -27,8 +27,8 @@ func (state *DateState) Init(server *server.Server, update *tgbotapi.Update) {
 
 	calendarMarkup := calendar.GenerateCalendar(now.Year(), now.Month())
 
-	server.Gomer.SendMessageWithMarkup(
-		chatID, i18n.Localize("chooseDatePromt"), calendarMarkup)
+	server.Gomer.SendMessageWithKeyboard(
+		chatID, i18n.Localize("chooseDatePromt"), &calendarMarkup)
 }
 
 func (state *DateState) Handle(server *server.Server, update *tgbotapi.Update) {

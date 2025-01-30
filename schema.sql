@@ -26,12 +26,12 @@ CREATE TABLE "commit" (
 
 -- "tg_group" definition
 
-	CREATE TABLE "tg_group" (
-		id INTEGER NOT NULL,
-		group_id INTEGER NOT NULL,
-		title TEXT NOT NULL,
-		CONSTRAINT tg_group_pk PRIMARY KEY (id)
-	);
+CREATE TABLE "tg_group" (
+	id INTEGER NOT NULL,
+	group_id INTEGER NOT NULL,
+	title TEXT NOT NULL,
+	CONSTRAINT tg_group_pk PRIMARY KEY (id)
+);
 
 
 -- "department" definition

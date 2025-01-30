@@ -8,6 +8,7 @@
     "commitDescription": "отписать свою активность за определенный день (данное сообщение попадет в ежедневный репорт) 📝",
     "modifyDescription": "модифицировать коммит за определенный день ✏️",
     "cancelDescription": "сбросить состояние, если что-то пошло не так 🛠",
+    "publishDescription": "немедленная публикация отчета ⚡",
 
     "trackStarted" : "Начато отслеживание текущего пользователя 👁️‍🗨️",
     "trackStopped" : "Отслеживание текущего пользователя прекращено 💔",
@@ -46,5 +47,9 @@
     "adminGroupManagementPrev" : "<",
     "adminGroupManagementNext" : ">",
     "adminGroupManagementUnlink" : "Отвязать группу от бота",
-    "adminGroupManagementGroupList" : "К списку групп"
+    "adminGroupManagementGroupList" : "К списку групп",
+
+    "forcePublishProcess" : "Началось формирование отчета, подождите пару секунд...",
+    "forcePublishSuccess" : "Отчет успешно опубликован 😎",
+    "forcePublishError" : "Ошибка при публикации отчета 🤕"
 }

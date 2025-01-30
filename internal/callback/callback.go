@@ -1,4 +1,4 @@
-package utils
+package callback
 
 import (
 	"encoding/json"
@@ -23,8 +23,129 @@ func (b *BaseCallback) GetType() string {
 Common callbacks.
 */
 const (
-	EXIT = "exit"
+	PREV         = "prev"    // pagination
+	NEXT         = "next"    // pagination
+	SWAP         = "swap"    // swap 2 entities
+	ADD          = "add"     // add new entity
+	SELECT       = "select"  // select entity
+	DELETE       = "delete"  // delete entity
+	BACK_TO_LIST = "bt_list" // back to the list of entities
+	EXIT         = "exit"
 )
+
+type PrevCallback struct {
+	BaseCallback
+	Page int
+}
+
+func NewPrevCallback(page int) string {
+	return Encode(
+		&PrevCallback{
+			BaseCallback: BaseCallback{
+				Type: PREV,
+			},
+			Page: page,
+		},
+	)
+}
+
+type NextCallback struct {
+	BaseCallback
+	Page int
+}
+
+func NewNextCallback(page int) string {
+	return Encode(
+		&NextCallback{
+			BaseCallback: BaseCallback{
+				Type: NEXT,
+			},
+			Page: page,
+		},
+	)
+}
+
+type SwapCallback struct {
+	BaseCallback
+	EntityIDA int64 `json:"a"`
+	EntityIDB int64 `json:"b"`
+}
+
+func NewSwapCallback(entityAID int64, entityBID int64) string {
+	return Encode(
+		&SwapCallback{
+			BaseCallback: BaseCallback{
+				Type: NEXT,
+			},
+			EntityIDA: entityAID,
+			EntityIDB: entityBID,
+		},
+	)
+}
+
+type SelectCallback struct {
+	BaseCallback
+	EntityID int
+	Page     int
+}
+
+func NewSelectCallback(entityID int, page int) string {
+	return Encode(
+		&SelectCallback{
+			BaseCallback: BaseCallback{
+				Type: NEXT,
+			},
+			EntityID: entityID,
+			Page:     page,
+		},
+	)
+}
+
+type DeleteCallback struct {
+	BaseCallback
+	EntityID int
+}
+
+func NewDeleteCallback(entityID int) string {
+	return Encode(
+		&DeleteCallback{
+			BaseCallback: BaseCallback{
+				Type: DELETE,
+			},
+			EntityID: entityID,
+		},
+	)
+}
+
+type AddCallback struct {
+	BaseCallback
+}
+
+func NewAddCallback() string {
+	return Encode(
+		&AddCallback{
+			BaseCallback: BaseCallback{
+				Type: ADD,
+			},
+		},
+	)
+}
+
+type ListCallback struct {
+	BaseCallback
+	Page int
+}
+
+func NewListCallback(page int) string {
+	return Encode(
+		&ListCallback{
+			BaseCallback: BaseCallback{
+				Type: BACK_TO_LIST,
+			},
+			Page: page,
+		},
+	)
+}
 
 type ExitCallback struct {
 	BaseCallback
@@ -41,7 +162,24 @@ func NewExitCallback() string {
 }
 
 /*
-Group administration callbacks (Admin Group management).
+Users administration callbacks (Admin Group management).
+*/
+const (
+	AU_PREV      = "au_prev"
+	AU_NEXT      = "au_next"
+	AU_MOVE_UP   = "au_mvup"
+	AU_MOVE_DOWN = "au_mvdw"
+	AU_SELECT    = "au_select"
+	AU_USER_LIST = "au_user_list"
+)
+
+type AUPrevCallback struct {
+	BaseCallback
+	Page int
+}
+
+/*
+Groups administration callbacks (Admin Group management).
 */
 const (
 	AG_PREV       = "ag_prev"
@@ -216,6 +354,34 @@ func Decode(data string) (Callback, error) {
 		var result ExitCallback
 		err := json.Unmarshal([]byte(data), &result)
 		return &result, err
+	case PREV:
+		var result PrevCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case NEXT:
+		var result NextCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case SWAP:
+		var result SwapCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case ADD:
+		var result AddCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case SELECT:
+		var result SelectCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case DELETE:
+		var result DeleteCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err		
+	case BACK_TO_LIST:
+		var result ListCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err	
 	case AG_PREV:
 		var result AGPrevCallback
 		err := json.Unmarshal([]byte(data), &result)

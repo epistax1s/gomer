@@ -1,53 +1,56 @@
 package interceptor
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
 	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/server"
-	"github.com/epistax1s/gomer/internal/state"
+	"github.com/epistax1s/gomer/internal/statemachine/core"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type HandlerInterceptor struct {
+	Server       *server.Server
+	StateMachine *core.StateMachine
 	BaseInterceptor
 }
 
-func (i *HandlerInterceptor) Handle(server *server.Server, update *tgbotapi.Update) {
+func (i *HandlerInterceptor) Handle(update *tgbotapi.Update) {
 	if update == nil {
 		return
 	}
 
 	if update.FromChat().IsPrivate() {
-		handleFromPrivate(server, update)
+		i.handleFromPrivate(update)
 	} else if update.FromChat().IsGroup() || update.FromChat().IsSuperGroup() {
-		handleFromGroup(server, update)
+		i.handleFromGroup(update)
 	} else {
 		log.Error("This bot can only be used in private conversations and in groups")
 	}
 }
 
-func handleFromPrivate(server *server.Server, update *tgbotapi.Update) {
+func (i *HandlerInterceptor) handleFromPrivate(update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
 
-	state.StateMachine.
+	i.StateMachine.
 		Get(chatID).
-		Handle(server, update)
+		Handle(update)
 }
 
-func handleFromGroup(server *server.Server, update *tgbotapi.Update) {
+func (i *HandlerInterceptor) handleFromGroup(update *tgbotapi.Update) {
+	gomer := i.Server.Gomer
+	groupService := i.Server.GroupService
+
 	chatID := update.FromChat().ID
 	title := update.FromChat().Title
 
 	cmd := update.Message.Command()
 
 	if cmd == "link" {
-		err := server.GroupService.LinkGroup(chatID, title)
-		if err == nil {
-			log.Info("a new group has been assigned to the bot",
-				"chatID", chatID, "title", title)
-
-			server.Gomer.SendMessage(chatID, i18n.Localize("groupSuccessfullyLinked"))
+		if err := groupService.LinkGroup(chatID, title); err == nil {
+			gomer.SendMessage(chatID, i18n.Localize("groupSuccessfullyLinked"))
+		} else {
+			gomer.SendMessage(chatID, i18n.Localize("oops"))
 		}
 	}
 }

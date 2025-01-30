@@ -7,7 +7,7 @@ import (
 
 	"github.com/epistax1s/gomer/internal/database"
 
-	callback "github.com/epistax1s/gomer/internal/utils"
+	callback "github.com/epistax1s/gomer/internal/callback"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 

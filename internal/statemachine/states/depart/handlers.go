@@ -1,43 +1,37 @@
-package state
+package depart
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
 	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/model"
-	"github.com/epistax1s/gomer/internal/server"
+
+	. "github.com/epistax1s/gomer/internal/statemachine/core"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-type TrackDepartmentState struct {
-	data *StateContext
-}
+func (state *TrackDepartmentState) Init(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+	departService := state.server.DepartService
 
-func NewTrackDepartmentState(data *StateContext) State {
-	return &TrackDepartmentState{
-		data: data,
-	}
-}
-
-func (state *TrackDepartmentState) Init(server *server.Server, update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
 
 	// get a list of departments
-	departments, err := server.DepartService.FindAll()
+	departments, err := departService.FindAll()
 	if err != nil {
 		log.Error(
 			"error when receiving all departments",
 			"chatID", chatID, "state", TrackDepartment, "step", "Init", "err", err)
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		gomer.SendMessage(chatID, i18n.Localize("oops"))
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Init(server, update)
+			Init(update)
 	}
 
 	// creating an inline keyboard for selecting a department
@@ -50,10 +44,13 @@ func (state *TrackDepartmentState) Init(server *server.Server, update *tgbotapi.
 	}
 
 	// send telegram message
-	server.Gomer.SendMessageWithKeyboard(chatID, i18n.Localize("chooseDepartmentPromt"), &departmentMarkup)
+	gomer.SendMessageWithKeyboard(chatID, i18n.Localize("chooseDepartmentPromt"), &departmentMarkup)
 }
 
-func (state *TrackDepartmentState) Handle(server *server.Server, update *tgbotapi.Update) {
+func (state *TrackDepartmentState) Handle(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+	departService := state.server.DepartService
+
 	chatID := update.FromChat().ID
 	callbackQuery := update.CallbackQuery
 
@@ -62,7 +59,7 @@ func (state *TrackDepartmentState) Handle(server *server.Server, update *tgbotap
 			"callbackQuery is nil",
 			"chatID", chatID, "state", TrackDepartment, "step", "Handle")
 
-		state.Init(server, update)
+		state.Init(update)
 		return
 	}
 
@@ -73,14 +70,14 @@ func (state *TrackDepartmentState) Handle(server *server.Server, update *tgbotap
 			"callbackQuery#data contains an invalid value",
 			"chatID", chatID, "state", TrackDepartment, "step", "Handle", "callbackQuery#data", callbackData, "err", extractDepartIdErr)
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Init(server, update)
+			Init(update)
 
 		return
 	}
 
-	callbackRespErr := server.Gomer.SendCallbackResponse(callbackQuery, i18n.Localize("chooseDepartmentSuccess"))
+	callbackRespErr := gomer.SendCallbackResponse(callbackQuery, i18n.Localize("chooseDepartmentSuccess"))
 	if callbackRespErr != nil {
 		log.Error(
 			"error confirming callback processing",
@@ -88,24 +85,24 @@ func (state *TrackDepartmentState) Handle(server *server.Server, update *tgbotap
 
 	}
 
-	department, err := server.DepartService.FindById(departmentId)
+	department, err := departService.FindById(departmentId)
 	if err != nil {
 		log.Error(
 			"error when getting the department from the database",
 			"chatID", chatID, "state", TrackDepartment, "step", "Handle", "departmentId", departmentId)
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("chooseDepartmentError"))
+		gomer.SendMessage(chatID, i18n.Localize("chooseDepartmentError"))
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Init(server, update)
+			Init(update)
 
 		return
 	}
 
-	StateMachine.
+	state.stateMachine.
 		Set(TrackName, chatID, &StateContext{Department: department}).
-		Init(server, update)
+		Init(update)
 
 }
 

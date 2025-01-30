@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 
 	"github.com/epistax1s/gomer/internal/model"
@@ -9,6 +11,7 @@ import (
 type GroupRepository interface {
 	Create(*model.Group) error
 	FindByID(int64) (*model.Group, error)
+	FindByGroupID(int64) (*model.Group, error)
 	FindAll() ([]model.Group, error)
 	FindPaginated(page int, pageSize int) ([]model.Group, error)
 	CountAll() (int64, error)
@@ -31,6 +34,16 @@ func (repo *groupRepository) Create(group *model.Group) error {
 func (repo *groupRepository) FindByID(id int64) (*model.Group, error) {
 	var group model.Group
 	result := repo.db.First(&group, id)
+	return &group, result.Error
+}
+
+func (repo *groupRepository) FindByGroupID(groupID int64) (*model.Group, error) {
+	var group model.Group
+
+	result := repo.db.
+		Where(fmt.Sprintf("%s = ?", model.GroupGroupID), groupID).
+		First(&group)
+
 	return &group, result.Error
 }
 

@@ -23,11 +23,14 @@ func StartPublish(server *server.Server) {
 		}
 
 		reportDate := calcReportDate(&now)
+		publishDate := &database.Date{
+			Time: now,
+		}
 		log.Info(
 			"generating a report",
-			"action", "report cron", "date", reportDate)
+			"action", "report cron", "reportDate", reportDate, "publishDate", publishDate)
 
-		err := BuildDailyReport(server, reportDate)
+		err := BuildDailyReport(server, reportDate, publishDate)
 		if err != nil {
 			log.Error(
 				"error generating the report",

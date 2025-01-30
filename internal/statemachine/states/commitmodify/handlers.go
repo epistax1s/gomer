@@ -1,4 +1,4 @@
-package state
+package commit_modify
 
 import (
 	"fmt"
@@ -7,33 +7,27 @@ import (
 
 	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
-	"github.com/epistax1s/gomer/internal/server"
+
+	. "github.com/epistax1s/gomer/internal/statemachine/core"
 )
 
-type CommitModifyState struct {
-	data *StateContext
-}
+func (state *CommitModifyState) Init(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+	commitService := state.server.CommitService
 
-func NewCommitModifyState(data *StateContext) State {
-	return &CommitModifyState{
-		data: data,
-	}
-}
-
-func (state *CommitModifyState) Init(server *server.Server, update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
 
-	commit, err := server.CommitService.FindCommitByUserIdAndDate(chatID, state.data.CommitDate)
+	commit, err := commitService.FindCommitByUserIdAndDate(chatID, state.data.CommitDate)
 	if err != nil {
 		log.Error(
 			"error when searching for a commit",
 			"chatID", chatID, "state", CommitModify, "step", "Init", "err", err)
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		gomer.SendMessage(chatID, i18n.Localize("oops"))
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Handle(server, update)
+			Handle(update)
 
 		return
 	}
@@ -41,11 +35,11 @@ func (state *CommitModifyState) Init(server *server.Server, update *tgbotapi.Upd
 	if commit == nil {
 		msg := fmt.Sprintf(i18n.Localize("commitNotFound"), state.data.CommitDate)
 
-		server.Gomer.SendMessage(chatID, msg)
+		gomer.SendMessage(chatID, msg)
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Handle(server, update)
+			Handle(update)
 
 		return
 	}
@@ -54,10 +48,13 @@ func (state *CommitModifyState) Init(server *server.Server, update *tgbotapi.Upd
 
 	msg := fmt.Sprintf(i18n.Localize("commitModifyPromt"), commit.Payload, commit.Date)
 
-	server.Gomer.SendMessage(chatID, msg)
+	gomer.SendMessage(chatID, msg)
 }
 
-func (state *CommitModifyState) Handle(server *server.Server, update *tgbotapi.Update) {
+func (state *CommitModifyState) Handle(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+	commitService := state.server.CommitService
+
 	chatID := update.FromChat().ID
 
 	// validate input
@@ -66,7 +63,7 @@ func (state *CommitModifyState) Handle(server *server.Server, update *tgbotapi.U
 			"message is nil",
 			"chatID", chatID, "state", Commit)
 
-		state.Init(server, update)
+		state.Init(update)
 		return
 	}
 
@@ -74,17 +71,17 @@ func (state *CommitModifyState) Handle(server *server.Server, update *tgbotapi.U
 	payload := update.Message.Text
 
 	// update commit
-	commit, err := server.CommitService.UpdateCommit(state.data.Commit.ID, payload)
+	commit, err := commitService.UpdateCommit(state.data.Commit.ID, payload)
 	if err != nil {
 		log.Error(
 			"error updating commit",
 			"chatID", chatID, "err", err)
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("commitModifyError"))
+		gomer.SendMessage(chatID, i18n.Localize("commitModifyError"))
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Init(server, update)
+			Init(update)
 
 		return
 	}
@@ -92,10 +89,10 @@ func (state *CommitModifyState) Handle(server *server.Server, update *tgbotapi.U
 	// notify about success
 	msg := fmt.Sprintf(i18n.Localize("commitModifySuccess"), commit.Date, commit.Payload)
 
-	server.Gomer.SendMessage(chatID, msg)
+	gomer.SendMessage(chatID, msg)
 
 	// set starting state
-	StateMachine.
+	state.stateMachine.
 		Set(Idle, chatID, &StateContext{}).
-		Init(server, update)
+		Init(update)
 }

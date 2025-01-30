@@ -12,6 +12,7 @@ import (
 
 type Server struct {
 	UserService       service.UserService
+	SecurityService   service.SecurityService
 	CommitService     service.CommitService
 	DepartService     service.DepartService
 	GroupService      service.GroupService
@@ -46,6 +47,8 @@ func InitServer() *Server {
 	userService := service.NewUserService(
 		repository.NewUserRepository(database))
 
+	securityService := service.NewSecurityService(userService)
+
 	commitService := service.NewCommitService(
 		userService, repository.NewCommitRepository(database))
 
@@ -60,6 +63,7 @@ func InitServer() *Server {
 
 	return &Server{
 		UserService:       userService,
+		SecurityService:   securityService,
 		CommitService:     commitService,
 		DepartService:     departService,
 		GroupService:      groupService,

@@ -1,55 +1,41 @@
-package state
+package manage_groups
 
 import (
+	"github.com/epistax1s/gomer/internal/callback"
 	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/model"
 	"github.com/epistax1s/gomer/internal/server"
-	callback "github.com/epistax1s/gomer/internal/utils"
+
+	. "github.com/epistax1s/gomer/internal/statemachine/core"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
-
-type AdminGroupState struct {
-	data *StateContext
-}
-
-func NewAdminGroupState(data *StateContext) State {
-	return &AdminGroupState{
-		data: data,
-	}
-}
 
 const (
 	PAGE_SIZE = 5
 )
 
-type agCallbackHandler func(*server.Server, *tgbotapi.Update, callback.Callback)
+func (state *ManageGroupsState) Init(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
 
-var agCallbacHandlers = map[string]agCallbackHandler{
-	callback.AG_PREV:       prevHandler,
-	callback.AG_NEXT:       nextHandler,
-	callback.AG_SELECT:     groupSelectHandler,
-	callback.AG_UNLINK:     groupUnlinkHandler,
-	callback.AG_GROUP_LIST: groupListHandler,
-	callback.EXIT:          exitHandler,
-}
-
-func (state *AdminGroupState) Init(server *server.Server, update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
 
-	keyboard, err := genGroupListKeyboard(server, 1)
+	keyboard, err := genGroupListKeyboard(state.server, 1)
 	if err != nil {
 		log.Error("group management / init - group list rendering errors",
 			"chatID", chatID, "page", err.Error())
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		gomer.SendMessage(chatID, i18n.Localize("oops"))
 		return
 	}
 
-	server.Gomer.SendMessageWithKeyboard(update.FromChat().ID, i18n.Localize("adminGroupManagementTitle"), keyboard)
+	gomer.SendMessageWithKeyboard(update.FromChat().ID, i18n.Localize("adminGroupManagementTitle"), keyboard)
 }
 
-func (state *AdminGroupState) Handle(server *server.Server, update *tgbotapi.Update) {
+func (state *ManageGroupsState) Handle(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+
 	chatID := update.FromChat().ID
 	query := update.CallbackQuery
 
@@ -59,27 +45,31 @@ func (state *AdminGroupState) Handle(server *server.Server, update *tgbotapi.Upd
 		if err != nil {
 			log.Error(err.Error())
 		}
-		agCallbacHandlers[callback.GetType()](server, update, callback)
+		state.handlers[callback.GetType()](update, callback)
 	} else {
-		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		gomer.SendMessage(chatID, i18n.Localize("oops"))
 	}
 }
 
-func prevHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+func (state *ManageGroupsState) prevHandler(update *tgbotapi.Update, c callback.Callback) {
 	prevCallback := c.(*callback.AGPrevCallback)
 	page := prevCallback.Page
 
-	renderGroupListKeyboard(server, update, page)
+	renderGroupListKeyboard(state.server, update, page)
 }
 
-func nextHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+func (state *ManageGroupsState) nextHandler(update *tgbotapi.Update, c callback.Callback) {
 	nextCallback := c.(*callback.AGNextCallback)
 	page := nextCallback.Page
 
-	renderGroupListKeyboard(server, update, page)
+	renderGroupListKeyboard(state.server, update, page)
 }
 
-func groupSelectHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+func (state *ManageGroupsState) selectHandler(update *tgbotapi.Update, c callback.Callback) {
+	server := state.server
+	gomer := server.Gomer
+	groupService := server.GroupService
+
 	selectCallback := c.(*callback.AGSelectCallback)
 
 	page := selectCallback.Page
@@ -87,37 +77,39 @@ func groupSelectHandler(server *server.Server, update *tgbotapi.Update, c callba
 
 	chatID := update.CallbackQuery.From.ID
 
-	group, err := server.GroupService.FindByID(int64(groupID))
+	group, err := groupService.FindByID(int64(groupID))
 	if err != nil {
 		log.Error("group management, error handling the groupSelect button, group not found",
 			"groupID", groupID, "callback", c, "err", err.Error())
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		gomer.SendMessage(chatID, i18n.Localize("oops"))
 		return
 	}
 
 	renderGroupControlKeyboard(server, update, page, group)
 }
 
-func groupUnlinkHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+func (state *ManageGroupsState) unlinkHandler(update *tgbotapi.Update, c callback.Callback) {
 	// TODO think about and implement group unlinking
 	log.Info("groupUnlinkHandler dummy ", "callback", c)
 }
 
-func groupListHandler(server *server.Server, update *tgbotapi.Update, c callback.Callback) {
+func (state *ManageGroupsState) listHandler(update *tgbotapi.Update, c callback.Callback) {
 	groupListCallback := c.(*callback.AGGroupListCallback)
 	page := groupListCallback.Page
 
-	renderGroupListKeyboard(server, update, page)
+	renderGroupListKeyboard(state.server, update, page)
 }
 
-func exitHandler(server *server.Server, update *tgbotapi.Update, callback callback.Callback) {
-	chatID := update.CallbackQuery.From.ID
-	StateMachine.
-		Set(Idle, chatID, &StateContext{}).
-		Init(server, update)
+func (state *ManageGroupsState) exitHandler(update *tgbotapi.Update, c callback.Callback) {
+	gomer := state.server.Gomer
 
-	server.Gomer.RemoveMarkup(update.CallbackQuery)
+	chatID := update.CallbackQuery.From.ID
+	state.stateMachine.
+		Set(Idle, chatID, &StateContext{}).
+		Init(update)
+
+	gomer.RemoveMarkup(update.CallbackQuery)
 }
 
 func renderGroupListKeyboard(server *server.Server, update *tgbotapi.Update, page int) {

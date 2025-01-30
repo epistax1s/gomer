@@ -9,3 +9,7 @@ type Group struct {
 func (Group) TableName() string {
 	return "tg_group"
 }
+
+const (
+	GroupGroupID = "group_id"
+)

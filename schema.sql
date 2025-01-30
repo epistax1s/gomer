@@ -3,7 +3,7 @@
 CREATE TABLE "tg_user" (
 	id INTEGER NOT NULL,
 	department_id INTEGER NOT NULL,
-	order INTEGER NOT NULL,
+	order INTEGER NOT NULL, -- need to make it unique
 	chat_id INTEGER NOT NULL,
 	name TEXT NOT NULL,
 	username TEXT NOT NULL,
@@ -39,6 +39,6 @@ CREATE TABLE "tg_group" (
 CREATE TABLE "department" (
 	id INTEGER NOT NULL,
 	department_name TEXT NOT NULL,
-	order INTEGER NOT NULL,
+	order INTEGER NOT NULL, -- need to make it unique
 	CONSTRAINT department_pk PRIMARY KEY (id)
 );

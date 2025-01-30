@@ -12,6 +12,7 @@ import (
 
 type UserService interface {
 	FindUserByChatID(int64) (*model.User, error)
+	FindPaginated(page int, pageSize int) ([]model.User, error)
 	FindAll() ([]model.User, error)
 	TrackUser(*model.User) error
 	UntrackUser(int64) error
@@ -49,6 +50,10 @@ func (service *userService) FindUserByChatID(chatID int64) (*model.User, error) 
 	return user, nil
 }
 
+func (service *userService) FindPaginated(page int, pageSize int) ([]model.User, error) {
+	return service.userRepo.FindPaginated(page, pageSize)
+}
+
 func (service *userService) FindAll() ([]model.User, error) {
 	return service.userRepo.FindAll()
 }
@@ -57,6 +62,7 @@ func (service *userService) TrackUser(user *model.User) error {
 	existsUser, _ := service.FindUserByChatID(user.ChatID)
 	if existsUser != nil {
 		// modifying and activating a previously deleted user
+		existsUser.DepartmentId = user.DepartmentId
 		existsUser.Name = user.Name
 		existsUser.Username = user.Username
 		existsUser.Status = model.UserStatusActive
@@ -105,4 +111,8 @@ func (service *userService) UserExists(chatID int64) (bool, error) {
 	}
 
 	return user.Status != model.UserStatusDeleted, nil
+}
+
+func (service *userService) CountAll() (int64, error) {
+	return service.userRepo.CountAll()
 }

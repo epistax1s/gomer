@@ -1,31 +1,26 @@
-package state
+package name
 
 import (
 	"strings"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
 	"github.com/epistax1s/gomer/internal/i18n"
 	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/model"
-	"github.com/epistax1s/gomer/internal/server"
+
+	. "github.com/epistax1s/gomer/internal/statemachine/core"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-type TrackNameState struct {
-	data *StateContext
+func (state *TrackNameState) Init(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+	gomer.SendMessage(update.FromChat().ID, i18n.Localize("enterNamePromt"))
 }
 
-func NewTrackNameState(data *StateContext) State {
-	return &TrackNameState{
-		data: data,
-	}
-}
+func (state *TrackNameState) Handle(update *tgbotapi.Update) {
+	gomer := state.server.Gomer
+	userService := state.server.UserService
 
-func (state *TrackNameState) Init(server *server.Server, update *tgbotapi.Update) {
-	server.Gomer.SendMessage(update.FromChat().ID, i18n.Localize("enterNamePromt"))
-}
-
-func (state *TrackNameState) Handle(server *server.Server, update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
 	chatUsername := update.FromChat().UserName
 
@@ -34,7 +29,7 @@ func (state *TrackNameState) Handle(server *server.Server, update *tgbotapi.Upda
 			"Message is nil",
 			"chatID", chatID, "state", TrackName, "step", "Handle")
 
-		state.Init(server, update)
+		state.Init(update)
 		return
 	}
 
@@ -46,9 +41,9 @@ func (state *TrackNameState) Handle(server *server.Server, update *tgbotapi.Upda
 			"Name has an invalid value",
 			"chatID", chatID, "state", TrackName, "step", "Handle", "name", name)
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("enterNameNotValid"))
+		gomer.SendMessage(chatID, i18n.Localize("enterNameNotValid"))
 
-		state.Init(server, update)
+		state.Init(update)
 		return
 	}
 
@@ -62,28 +57,28 @@ func (state *TrackNameState) Handle(server *server.Server, update *tgbotapi.Upda
 		Status:       model.UserStatusActive,
 	}
 
-	err := server.UserService.TrackUser(user)
+	err := userService.TrackUser(user)
 	if err != nil {
 		log.Info(
 			"error registering a new user",
 			"chatID", chatID, "state", TrackName, "step", "Handle", "name", name)
 
-		server.Gomer.SendMessage(chatID, i18n.Localize("oops"))
+		gomer.SendMessage(chatID, i18n.Localize("oops"))
 
-		StateMachine.
+		state.stateMachine.
 			Set(Idle, chatID, &StateContext{}).
-			Init(server, update)
+			Init(update)
 	}
 
-	server.Gomer.SendMessage(chatID, i18n.Localize("trackStarted"))
+	gomer.SendMessage(chatID, i18n.Localize("trackStarted"))
 
 	log.Info(
 		"the user has successfully registered",
 		"chatID", chatID, "state", TrackName, "step", "Handle", "name", name)
 
-	StateMachine.
+	state.stateMachine.
 		Set(Idle, chatID, &StateContext{}).
-		Init(server, update)
+		Init(update)
 }
 
 func isValidName(name string) bool {

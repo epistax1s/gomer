@@ -13,12 +13,12 @@ import (
 	"github.com/epistax1s/gomer/internal/server"
 )
 
-func BuildDailyReport(server *server.Server, date *database.Date) error {
-	reports, err := server.FullCommitService.FindAllByDate(date)
+func BuildDailyReport(server *server.Server, reportDate *database.Date, publishDate *database.Date) error {
+	reports, err := server.FullCommitService.FindAllByDate(reportDate)
 	if err != nil {
 		log.Error(
 			"errors in Compiling the daily report",
-			"date", date, "err", err)
+			"reportDate", reportDate, "err", err)
 	}
 
 	sort.Sort(model.ByDepartamentAndName(reports))
@@ -30,7 +30,7 @@ func BuildDailyReport(server *server.Server, date *database.Date) error {
 	messageBuilder.WriteString("#")
 	messageBuilder.WriteString(i18n.Localize("reportTitle"))
 	messageBuilder.WriteString(" ")
-	messageBuilder.WriteString(date.String())
+	messageBuilder.WriteString(publishDate.String())
 	messageBuilder.WriteString("\n\n")
 
 	for _, report := range reports {

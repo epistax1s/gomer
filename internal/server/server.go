@@ -17,6 +17,8 @@ type Server struct {
 	DepartService     service.DepartService
 	GroupService      service.GroupService
 	FullCommitService service.FullCommitService
+	AuthKeyService    service.AuthKeyService
+	AuthUserService   service.AuthUserService
 	Config            *config.Config
 	Gomer             *gomer.Gomer
 }
@@ -61,6 +63,12 @@ func InitServer() *Server {
 	reportService := service.NewFullCommitService(
 		repository.NewFullCommit(database))
 
+	authKeyService := service.NewAuthKeyService(
+		repository.NewAuthKeyRepository(database))
+
+	authUserService := service.NewAuthUserService(
+		repository.NewAuthUserRepository(database))
+
 	return &Server{
 		UserService:       userService,
 		SecurityService:   securityService,
@@ -68,6 +76,8 @@ func InitServer() *Server {
 		DepartService:     departService,
 		GroupService:      groupService,
 		FullCommitService: reportService,
+		AuthKeyService:    authKeyService,
+		AuthUserService:   authUserService,
 		Config:            config,
 		Gomer:             gomer,
 	}

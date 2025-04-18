@@ -3,7 +3,7 @@
 CREATE TABLE "tg_user" (
 	id INTEGER NOT NULL,
 	department_id INTEGER NOT NULL,
-	order INTEGER NOT NULL, -- need to make it unique
+	"order" INTEGER NOT NULL,
 	chat_id INTEGER NOT NULL,
 	name TEXT NOT NULL,
 	username TEXT NOT NULL,
@@ -39,6 +39,21 @@ CREATE TABLE "tg_group" (
 CREATE TABLE "department" (
 	id INTEGER NOT NULL,
 	department_name TEXT NOT NULL,
-	order INTEGER NOT NULL, -- need to make it unique
+	"order" INTEGER NOT NULL, -- need to make it unique
 	CONSTRAINT department_pk PRIMARY KEY (id)
+);
+
+-- "auth_key" definition
+CREATE TABLE "auth_key" (
+	id INTEGER NOT NULL,
+	"key" TEXT NOT NULL,
+	CONSTRAINT auth_key_pk PRIMARY KEY (id)
+);
+
+-- "auth_user" definition
+CREATE TABLE "auth_user" (
+	id INTEGER NOT NULL,
+	chat_id INTEGER NOT NULL,
+	username TEXT NOT NULL,
+	CONSTRAINT auth_key_pk PRIMARY KEY (id)
 );

@@ -25,6 +25,9 @@ func main() {
 	chain := interceptor.NewChainBuilder().
 		Add(&interceptor.LogInterceptor{}).
 		Add(&interceptor.RecoverInterceptor{}).
+		Add(&interceptor.SecurityInterceptor{
+			Server: server,
+		}).
 		Add(&interceptor.CancelInterceptor{
 			Server:       server,
 			StateMachine: stateMachine,

@@ -40,17 +40,28 @@ func (i *HandlerInterceptor) handleFromPrivate(update *tgbotapi.Update) {
 func (i *HandlerInterceptor) handleFromGroup(update *tgbotapi.Update) {
 	gomer := i.Server.Gomer
 	groupService := i.Server.GroupService
+	authUserService := i.Server.AuthUserService
 
-	chatID := update.FromChat().ID
+	groupChatID := update.FromChat().ID
 	title := update.FromChat().Title
 
 	cmd := update.Message.Command()
 
 	if cmd == "link" {
-		if err := groupService.LinkGroup(chatID, title); err == nil {
-			gomer.SendMessage(chatID, i18n.Localize("groupSuccessfullyLinked"))
+		userChatID := update.Message.From.ID
+		if !authUserService.IsRegistered(userChatID) {
+			log.Info(
+				"unregistered user tried to link a group",
+				"groupChatID", groupChatID, "userChatID", userChatID,
+				"groupTitle", title, "cmd", cmd)
+
+			return
+		}
+
+		if err := groupService.LinkGroup(groupChatID, title); err == nil {
+			gomer.SendMessage(groupChatID, i18n.Localize("groupSuccessfullyLinked"))
 		} else {
-			gomer.SendMessage(chatID, i18n.Localize("oops"))
+			gomer.SendMessage(groupChatID, i18n.Localize("oops"))
 		}
 	}
 }

@@ -52,8 +52,7 @@ func (state *DateState) prevHandler(update *tgbotapi.Update, c callback.Callback
 	prevCallback := c.(*callback.CalendarPrevCallback)
 	calendarMarkup, _, _ := calendar.HandlePrevButton(prevCallback.Year, prevCallback.Month)
 
-	gomer.EditMessageWithKeyboard(
-		chatID, messageID, i18n.Localize("chooseDatePromt"), calendarMarkup)
+	gomer.EditMessageWithKeyboard(chatID, messageID, i18n.Localize("chooseDatePromt"), calendarMarkup)
 }
 
 func (state *DateState) nextHandler(update *tgbotapi.Update, c callback.Callback) {
@@ -65,8 +64,7 @@ func (state *DateState) nextHandler(update *tgbotapi.Update, c callback.Callback
 	nextCallback := c.(*callback.CalendarNextCallback)
 	calendarMarkup, _, _ := calendar.HandleNextButton(nextCallback.Year, nextCallback.Month)
 
-	gomer.EditMessageWithKeyboard(
-		chatID, messageID, i18n.Localize("chooseDatePromt"), calendarMarkup)
+	gomer.EditMessageWithKeyboard(chatID, messageID, i18n.Localize("chooseDatePromt"), calendarMarkup)
 }
 
 func (state *DateState) dateHandler(update *tgbotapi.Update, c callback.Callback) {
@@ -100,6 +98,6 @@ func (state *DateState) dateHandler(update *tgbotapi.Update, c callback.Callback
 		"chatID", chatID, "state", Date, "date", commitDate, "nextState", nextState)
 
 	state.stateMachine.
-		Set(nextState, chatID, &StateContext{CommitDate: commitDate}).
+		Set(nextState, chatID, &StateContext{SelectedDate: commitDate}).
 		Init(update)
 }

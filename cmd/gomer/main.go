@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/epistax1s/gomer/internal/interceptor"
-	"github.com/epistax1s/gomer/internal/report"
 	"github.com/epistax1s/gomer/internal/server"
 	"github.com/epistax1s/gomer/internal/statemachine/builder"
 
@@ -13,9 +12,6 @@ func main() {
 	server := server.InitServer()
 
 	stateMachine := builder.NewStateMachine(server)
-
-	report.StartNotification(server)
-	report.StartPublish(server)
 
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 60

@@ -17,7 +17,7 @@ func (state *CommitModifyState) Init(update *tgbotapi.Update) {
 
 	chatID := update.FromChat().ID
 
-	commit, err := commitService.FindCommitByUserIdAndDate(chatID, state.data.CommitDate)
+	commit, err := commitService.FindCommitByUserIdAndDate(chatID, state.data.SelectedDate)
 	if err != nil {
 		log.Error(
 			"error when searching for a commit",
@@ -33,7 +33,7 @@ func (state *CommitModifyState) Init(update *tgbotapi.Update) {
 	}
 
 	if commit == nil {
-		msg := fmt.Sprintf(i18n.Localize("commitNotFound"), state.data.CommitDate)
+		msg := fmt.Sprintf(i18n.Localize("commitNotFound"), state.data.SelectedDate)
 
 		gomer.SendMessage(chatID, msg)
 

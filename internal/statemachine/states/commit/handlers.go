@@ -17,7 +17,7 @@ func (state *CommitState) Init(update *tgbotapi.Update) {
 
 	chatID := update.FromChat().ID
 
-	commit, err := commitService.FindCommitByUserIdAndDate(chatID, state.data.CommitDate)
+	commit, err := commitService.FindCommitByUserIdAndDate(chatID, state.data.SelectedDate)
 	if err != nil {
 		log.Error(
 			"error when searching for a commit",
@@ -35,9 +35,9 @@ func (state *CommitState) Init(update *tgbotapi.Update) {
 	if commit != nil {
 		log.Info(
 			"attempt to create a second commit on the same date",
-			"chatID", chatID, "state", commit, "step", "Init", "date", state.data.CommitDate)
+			"chatID", chatID, "state", commit, "step", "Init", "date", state.data.SelectedDate)
 
-		msg := fmt.Sprintf(i18n.Localize("commitAlreadyCreated"), state.data.CommitDate, commit.Payload)
+		msg := fmt.Sprintf(i18n.Localize("commitAlreadyCreated"), state.data.SelectedDate, commit.Payload)
 
 		gomer.SendMessage(chatID, msg)
 
@@ -48,7 +48,7 @@ func (state *CommitState) Init(update *tgbotapi.Update) {
 		return
 	}
 
-	msg := fmt.Sprintf(i18n.Localize("commitCreatePromt"), state.data.CommitDate)
+	msg := fmt.Sprintf(i18n.Localize("commitCreatePromt"), state.data.SelectedDate)
 
 	gomer.SendMessage(chatID, msg)
 }
@@ -72,14 +72,14 @@ func (state *CommitState) Handle(update *tgbotapi.Update) {
 	payload := update.Message.Text
 
 	// create commit
-	err := commitService.CreateCommit(chatID, payload, state.data.CommitDate)
+	err := commitService.CreateCommit(chatID, payload, state.data.SelectedDate)
 	if err != nil {
 		gomer.SendMessage(chatID, i18n.Localize("commitCreateError"))
 		return
 	}
 
 	// send success response
-	msg := fmt.Sprintf(i18n.Localize("commitCreateSuccess"), state.data.CommitDate, payload)
+	msg := fmt.Sprintf(i18n.Localize("commitCreateSuccess"), state.data.SelectedDate, payload)
 
 	gomer.SendMessage(chatID, msg)
 

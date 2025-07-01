@@ -2,7 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS 'commit' (
     id INTEGER NOT NULL,
-    'user_id' INTEGER,
+    'user_id' INTEGER NOT NULL,
     'commit_payload' TEXT NOT NULL,
     'commit_date' TEXT NOT NULL,
     CONSTRAINT commit_pk PRIMARY KEY (id),

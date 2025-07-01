@@ -14,6 +14,7 @@ type UserRepository interface {
 	Delete(id int64) (bool, error)
 	FindPaginated(page int, pageSize int) ([]model.User, error)
 	FindAll() ([]model.User, error)
+	FindAllActive() ([]model.User, error)
 	FindByUsername(username string) (*model.User, error)
 	FindByChatID(chatID int64) (*model.User, error)
 	CountAll() (int64, error)
@@ -54,6 +55,16 @@ func (repo *userRepository) FindPaginated(page int, pageSize int) ([]model.User,
 func (repo *userRepository) FindAll() ([]model.User, error) {
 	var users []model.User
 	result := repo.db.Find(&users)
+	return users, result.Error
+}
+
+func (repo *userRepository) FindAllActive() ([]model.User, error) {
+	var users []model.User
+	
+	result := repo.db.
+		Where(fmt.Sprintf("%s = ?", model.UserStatusColumn), model.UserStatusActive).
+		Find(&users)
+
 	return users, result.Error
 }
 

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tg_user (
     'department_id' INTEGER NOT NULL,
     'order' INTEGER NOT NULL,
     'chat_id' INTEGER NOT NULL,
+    'redmine_id' INTEGER, 
     'name' TEXT NOT NULL,
     'username' TEXT NOT NULL,
     'role' TEXT NOT NULL,

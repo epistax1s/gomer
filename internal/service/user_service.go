@@ -15,6 +15,7 @@ type UserService interface {
 	FindUserByChatID(int64) (*model.User, error)
 	FindPaginated(page int, pageSize int) ([]model.User, error)
 	FindAll() ([]model.User, error)
+	FindAllActive() ([]model.User, error)
 	TrackUser(*model.User) error
 	UntrackUser(int64) error
 	SetCommitSrc(chatID int64, commitSrc string) error
@@ -64,11 +65,15 @@ func (service *userService) FindAll() ([]model.User, error) {
 	return service.userRepo.FindAll()
 }
 
+func (service *userService) FindAllActive() ([]model.User, error) {
+	return service.userRepo.FindAllActive()
+}
+
 func (service *userService) TrackUser(user *model.User) error {
 	existsUser, _ := service.FindUserByChatID(user.ChatID)
 	if existsUser != nil {
 		// modifying and activating a previously deleted user
-		existsUser.DepartmentId = user.DepartmentId
+		existsUser.DepartmentID = user.DepartmentID
 		existsUser.Name = user.Name
 		existsUser.Username = user.Username
 		existsUser.Status = model.UserStatusActive

@@ -49,7 +49,7 @@ func (state *TrackNameState) Handle(update *tgbotapi.Update) {
 
 	user := &model.User{
 		ChatID:       chatID,
-		DepartmentId: state.data.Department.ID,
+		DepartmentID: state.data.Department.ID,
 		Order:        0,
 		Name:         messageText,
 		Username:     chatUsername,

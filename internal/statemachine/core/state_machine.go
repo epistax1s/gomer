@@ -36,17 +36,17 @@ const (
 	Date            StateType = "date"
 	Commit          StateType = "commit"
 	CommitModify    StateType = "commitModify"
-	Config			StateType = "config"
+	Config          StateType = "config"
 	ForcePublish    StateType = "Publish"
 	ManageUsers     StateType = "manageUsers"
 	ManageGrops     StateType = "manageGroups"
 )
 
 type StateContext struct {
-	Commit     *model.Commit
-	CommitDate *database.Date
-	Department *model.Department
-	NextState  StateType
+	Commit       *model.Commit
+	SelectedDate *database.Date
+	Department   *model.Department
+	NextState    StateType
 }
 
 func (stateMachine *StateMachine) Set(stateType StateType, chatID int64, data *StateContext) State {

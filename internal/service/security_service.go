@@ -105,6 +105,12 @@ Registers a new user in limbo status.
  3. Returns an error if the user already exists
 */
 func (service *securityService) RegisterUser(chatID int64, username string, name string, inviteCode string) error {
+	// Step 0: We don't do anything if the user is already registered.
+	if isRegistered := service.IsRegistered(chatID); isRegistered {
+		log.Warn("the user is already registered", "chatID", chatID, "username", username)
+		return nil
+	}
+
 	// Step 1: Validate invitation
 	if valid := service.invitationService.ValidateInvite(inviteCode); !valid {
 		return fmt.Errorf("invalid invitation code")

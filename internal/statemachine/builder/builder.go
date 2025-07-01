@@ -3,6 +3,7 @@ package builder
 import (
 	"github.com/epistax1s/gomer/internal/server"
 	"github.com/epistax1s/gomer/internal/statemachine/states/commit"
+	"github.com/epistax1s/gomer/internal/statemachine/states/config"
 	"github.com/epistax1s/gomer/internal/statemachine/states/date"
 	"github.com/epistax1s/gomer/internal/statemachine/states/depart"
 	"github.com/epistax1s/gomer/internal/statemachine/states/idle"
@@ -27,6 +28,7 @@ func NewStateMachine(server *server.Server) *StateMachine {
 			Date:            date.NewDateState,
 			Commit:          commit.NewCommitState,
 			CommitModify:    commit_modify.NewCommitModifyState,
+			Config:			 config.NewConfigState,
 			ForcePublish:    publish.NewForcePublishState,
 			ManageUsers:     manage_users.NewManageUsersState,
 			ManageGrops:     manage_groups.NewManageGroupsState,

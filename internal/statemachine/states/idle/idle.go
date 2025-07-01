@@ -6,15 +6,18 @@ import (
 )
 
 const (
-	cmdStart        = "start"
-	cmdHelp         = "help"
-	cmdTrack        = "track"
-	cmdUntrack      = "untrack"
-	cmdCommit       = "commit"
-	cmdCommitModify = "modify"
-	cmdForcePublish = "publish"
-	cmdManageUsers  = "users"
-	cmdManageGroups = "groups"
+	cmdStart          = "start"
+	cmdHelp           = "help"
+	cmdTrack          = "track"
+	cmdUntrack        = "untrack"
+	cmdCommit         = "commit"
+	cmdCommitModify   = "commit_modify"
+	cmdConfig         = "config"
+	cmdForcePublish   = "force_publish"
+	cmdManageUsers    = "manage_users"
+	cmdManageGroups   = "manage_groups"
+	cmdMyInvites      = "invites"
+	cmdGenerateInvite = "invite_new"
 )
 
 type IdleState struct {
@@ -30,15 +33,18 @@ func NewIdleState(server *server.Server, stateMachine *StateMachine, data *State
 	}
 
 	state.handlers = map[string]StateHandler{
-		cmdStart:        state.helpHandler,
-		cmdHelp:         state.helpHandler,
-		cmdTrack:        state.trackHandler,
-		cmdUntrack:      state.untrackHandler,
-		cmdCommit:       state.commitHandler,
-		cmdCommitModify: state.commitModifyHandler,
-		cmdForcePublish: state.forcePublishHandler,
-		cmdManageUsers:  state.manageUsersHandler,
-		cmdManageGroups: state.manageGroupsHandler,
+		cmdStart:          state.helpHandler,
+		cmdHelp:           state.helpHandler,
+		cmdTrack:          state.trackHandler,
+		cmdUntrack:        state.untrackHandler,
+		cmdCommit:         state.commitHandler,
+		cmdCommitModify:   state.commitModifyHandler,
+		cmdConfig:         state.configHandler,
+		cmdForcePublish:   state.forcePublishHandler,
+		cmdManageUsers:    state.manageUsersHandler,
+		cmdManageGroups:   state.manageGroupsHandler,
+		cmdGenerateInvite: state.generateInviteHandler,
+		cmdMyInvites:      state.myInvitesHandler,
 	}
 
 	return state

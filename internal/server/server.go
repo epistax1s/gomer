@@ -17,8 +17,7 @@ type Server struct {
 	DepartService     service.DepartService
 	GroupService      service.GroupService
 	FullCommitService service.FullCommitService
-	AuthKeyService    service.AuthKeyService
-	AuthUserService   service.AuthUserService
+	InvitationService service.InvitationService
 	Config            *config.Config
 	Gomer             *gomer.Gomer
 }
@@ -38,36 +37,42 @@ func InitServer() *Server {
 	}
 	log.Info("Server initialization: telegram bot initialization")
 
-	database, err := database.InitDatabase()
+	db, err := database.InitDatabase()
 	if err != nil {
 		panic("Server initialization error. err = " + err.Error())
 	}
 	log.Info("Server initialization: connecting to the database")
 
+	err = database.RunMigrations("./database/gomer.db")
+	if err != nil {
+		panic("Server initialization error. err = " + err.Error())
+	}
+	log.Info("Server initialization: running migrations")
+
 	i18n.InitLocalizer()
 
 	userService := service.NewUserService(
-		repository.NewUserRepository(database))
+		repository.NewUserRepository(db))
 
-	securityService := service.NewSecurityService(userService)
+	invitationService := service.NewInvitationService(
+		repository.NewInvitationRepository(db))
+
+	securityService := service.NewSecurityService(
+		userService,
+		invitationService,
+		db)
 
 	commitService := service.NewCommitService(
-		userService, repository.NewCommitRepository(database))
+		userService, repository.NewCommitRepository(db))
 
 	departService := service.NewDepartService(
-		repository.NewDepartRepository(database))
+		repository.NewDepartRepository(db))
 
 	groupService := service.NewGroupService(
-		repository.NewGroupRepository(database))
+		repository.NewGroupRepository(db))
 
 	reportService := service.NewFullCommitService(
-		repository.NewFullCommit(database))
-
-	authKeyService := service.NewAuthKeyService(
-		repository.NewAuthKeyRepository(database))
-
-	authUserService := service.NewAuthUserService(
-		repository.NewAuthUserRepository(database))
+		repository.NewFullCommit(db))
 
 	return &Server{
 		UserService:       userService,
@@ -76,8 +81,7 @@ func InitServer() *Server {
 		DepartService:     departService,
 		GroupService:      groupService,
 		FullCommitService: reportService,
-		AuthKeyService:    authKeyService,
-		AuthUserService:   authUserService,
+		InvitationService: invitationService,
 		Config:            config,
 		Gomer:             gomer,
 	}

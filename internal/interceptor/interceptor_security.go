@@ -19,61 +19,50 @@ func (i *SecurityInterceptor) Handle(update *tgbotapi.Update) {
 		return
 	}
 
-	if update.Message != nil && update.Message.Command() == "start" {
-		log.Info("i.Register(update)")
-		i.Register(update)
-	} else {
-		log.Info("i.IsRegistered(update)")
-		i.IsRegistered(update)
-	}
-}
-
-func (i *SecurityInterceptor) Register(update *tgbotapi.Update) {
 	gomer := i.Server.Gomer
-	authUserService := i.Server.AuthUserService
-	authKeyService := i.Server.AuthKeyService
 
-	chatID := update.FromChat().ID
-	username := update.FromChat().UserName
+	chat :=update.FromChat()
 
-	key := update.Message.CommandArguments()
+	chatID := chat.ID
+	username := chat.UserName
+	name := chat.FirstName + chat.LastName
 
-	log.Info("attempt to register a user.", "chatID", chatID, "username", username, "key", key)
+	securityService := i.Server.SecurityService
 
-	if authUserService.IsRegistered(chatID) {
-		log.Info("the user is already registered", "chatID", chatID, "username", username, "key", key)
-		i.Next(update)
-	} else {
-		if !authKeyService.IsValidKey(key) {
-			log.Error("invalid key", "chatID", chatID, "username", username, "key", key)
-			gomer.SendMessage(chatID, i18n.Localize("accessDenied"))
+	if update.Message != nil && update.Message.Command() == "start" {
+		// Registration flow with invite code
+		inviteCode := update.Message.CommandArguments()
+		if inviteCode == "" {
+			gomer.SendMessage(chatID, i18n.Localize("inviteCodeRequired"))
 			return
 		}
 
-		if err := authUserService.Register(chatID, username); err == nil {
-			log.Info("the user has been successfully registered", "chatID", chatID, "username", username, "key", key)
-			i.Next(update)
-		} else {
-			log.Error("error during user registration", "chatID", chatID, "username", username, "key", key, "err", err)
-			gomer.SendMessage(chatID, i18n.Localize("accessDenied"))
+		err := securityService.RegisterUser(chatID, username, name, inviteCode)
+		if err != nil {
+			log.Error("failed to register user", "chatID", chatID, "username", username, "error", err)
+			gomer.SendMessage(chatID, i18n.Localize("registrationFailed"))
+			return
 		}
-	}
-}
 
-func (i *SecurityInterceptor) IsRegistered(update *tgbotapi.Update) {
-	gomer := i.Server.Gomer
-	authUserService := i.Server.AuthUserService
-
-	chatID := update.FromChat().ID
-	username := update.FromChat().UserName
-
-	log.Info("verifying user access", "chatID", chatID, "username", username)
-
-	if authUserService.IsRegistered(chatID) {
-		log.Info("the user is authenticated, access is allowed", "chatID", chatID, "username", username)
+		log.Info("user successfully registered", "chatID", chatID, "username", username)
+		gomer.SendMessage(chatID, i18n.Localize("registrationSuccess"))
 		i.Next(update)
-	} else {
-		log.Info("user authentication error, access is denied", "chatID", chatID, "username", username)
-		gomer.SendMessage(chatID, i18n.Localize("accessDenied"))
+		return
 	}
+
+	// Authentication flow for existing users
+	isAuthenticated, err := securityService.AuthenticateUser(chatID)
+	if err != nil {
+		log.Error("authentication error", "chatID", chatID, "username", username, "error", err)
+		gomer.SendMessage(chatID, i18n.Localize("authError"))
+		return
+	}
+
+	if !isAuthenticated {
+		log.Info("unauthorized access attempt", "chatID", chatID, "username", username)
+		gomer.SendMessage(chatID, i18n.Localize("accessDenied"))
+		return
+	}
+
+	i.Next(update)
 }

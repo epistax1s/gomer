@@ -40,7 +40,7 @@ func (i *HandlerInterceptor) handleFromPrivate(update *tgbotapi.Update) {
 func (i *HandlerInterceptor) handleFromGroup(update *tgbotapi.Update) {
 	gomer := i.Server.Gomer
 	groupService := i.Server.GroupService
-	authUserService := i.Server.AuthUserService
+	securityService := i.Server.SecurityService
 
 	groupChatID := update.FromChat().ID
 	title := update.FromChat().Title
@@ -49,12 +49,13 @@ func (i *HandlerInterceptor) handleFromGroup(update *tgbotapi.Update) {
 
 	if cmd == "link" {
 		userChatID := update.Message.From.ID
-		if !authUserService.IsRegistered(userChatID) {
+
+		if isAdmin := securityService.IsAdmin(userChatID); !isAdmin {
 			log.Info(
-				"unregistered user tried to link a group",
+				"Only an admin can link a group to a bot",
 				"groupChatID", groupChatID, "userChatID", userChatID,
 				"groupTitle", title, "cmd", cmd)
-
+	
 			return
 		}
 

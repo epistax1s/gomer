@@ -36,6 +36,7 @@ const (
 	Date            StateType = "date"
 	Commit          StateType = "commit"
 	CommitModify    StateType = "commitModify"
+	Config			StateType = "config"
 	ForcePublish    StateType = "Publish"
 	ManageUsers     StateType = "manageUsers"
 	ManageGrops     StateType = "manageGroups"

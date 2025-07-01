@@ -26,7 +26,7 @@ type LogConfig struct {
 }
 
 func LoadConfig() (*Config, error) {
-	bytes, err := os.ReadFile("/app/config/config.json")
+	bytes, err := os.ReadFile("./config/config.json")
 	if err != nil {
 		return nil, err
 	}

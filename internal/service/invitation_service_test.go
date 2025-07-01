@@ -50,8 +50,8 @@ func TestInvitationService_ValidateInvite(t *testing.T) {
 
 	t.Run("valid active invitation", func(t *testing.T) {
 		invitation := &model.Invitation{
-			Code:     "valid_code",
-			IsActive: true,
+			Code: "valid_code",
+			Used: true,
 		}
 		mockRepo.On("FindByCode", "valid_code").Return(invitation, nil).Once()
 
@@ -63,8 +63,8 @@ func TestInvitationService_ValidateInvite(t *testing.T) {
 
 	t.Run("inactive invitation", func(t *testing.T) {
 		invitation := &model.Invitation{
-			Code:     "used_code",
-			IsActive: false,
+			Code: "used_code",
+			Used: false,
 		}
 		mockRepo.On("FindByCode", "used_code").Return(invitation, nil).Once()
 
@@ -90,8 +90,8 @@ func TestInvitationService_UseInvitation(t *testing.T) {
 
 	t.Run("successful use of invitation", func(t *testing.T) {
 		invitation := &model.Invitation{
-			Code:     "valid_code",
-			IsActive: true,
+			Code: "valid_code",
+			Used: true,
 		}
 		user := &model.User{
 			ID: 1,
@@ -103,7 +103,7 @@ func TestInvitationService_UseInvitation(t *testing.T) {
 		err := service.UseInvitation("valid_code", user)
 
 		assert.NoError(t, err)
-		assert.False(t, invitation.IsActive)
+		assert.False(t, invitation.Used)
 		assert.NotNil(t, invitation.UsedByID)
 		assert.NotNil(t, invitation.UsedAt)
 		mockRepo.AssertExpectations(t)
@@ -111,8 +111,8 @@ func TestInvitationService_UseInvitation(t *testing.T) {
 
 	t.Run("already used invitation", func(t *testing.T) {
 		invitation := &model.Invitation{
-			Code:     "used_code",
-			IsActive: false,
+			Code: "used_code",
+			Used: false,
 		}
 		user := &model.User{
 			ID: 1,
@@ -151,13 +151,13 @@ func TestInvitationService_GetInvitesByCreator(t *testing.T) {
 				ID:          1,
 				Code:        "code1",
 				CreatedByID: userID,
-				IsActive:    true,
+				Used:        true,
 			},
 			{
 				ID:          2,
 				Code:        "code2",
 				CreatedByID: userID,
-				IsActive:    false,
+				Used:        false,
 			},
 		}
 

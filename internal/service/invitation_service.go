@@ -41,7 +41,7 @@ func (service *invitationService) GenerateInvite(createdByUserID int64) (string,
 		Code:        code,
 		CreatedByID: createdByUserID,
 		CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),
-		IsActive:    true,
+		Used:        false,
 	}
 
 	if err := service.invitationRepo.Create(invitation); err != nil {
@@ -60,13 +60,8 @@ func (service *invitationService) ValidateInvite(code string) bool {
 		return false
 	}
 
-	// Validate invitation is still active
-	if !invitation.IsActive {
-		log.Info("invitation code has already been used", "code", code)
-		return false
-	}
-
-	return true
+	log.Info("check invitation code", "code", code, "used", invitation.Used)
+	return !invitation.Used
 }
 
 func (service *invitationService) UseInvitation(code string, usedByUser *model.User) error {
@@ -76,15 +71,15 @@ func (service *invitationService) UseInvitation(code string, usedByUser *model.U
 		return err
 	}
 
-	if !invitation.IsActive {
+	if invitation.Used {
 		return fmt.Errorf("invitation code %s has already been used", code)
 	}
 
 	// Mark invitation as used
 	now := time.Now().Format("2006-01-02 15:04:05")
+	invitation.Used = true
 	invitation.UsedByID = &usedByUser.ID
 	invitation.UsedAt = &now
-	invitation.IsActive = false
 
 	if err := service.invitationRepo.Update(invitation); err != nil {
 		return fmt.Errorf("failed to mark invitation as used: %w", err)

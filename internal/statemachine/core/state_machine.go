@@ -37,7 +37,8 @@ const (
 	Commit          StateType = "commit"
 	CommitModify    StateType = "commitModify"
 	Config          StateType = "config"
-	ForcePublish    StateType = "Publish"
+	RedmineID       StateType = "redmineID"
+	ForcePublish    StateType = "publish"
 	ManageUsers     StateType = "manageUsers"
 	ManageGrops     StateType = "manageGroups"
 )

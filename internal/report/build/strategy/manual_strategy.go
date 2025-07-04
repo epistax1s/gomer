@@ -17,6 +17,8 @@ func NewManualStrategy(cm service.CommitService) *ManualStrategy {
 }
 
 func (s *ManualStrategy) FetchCommit(user *model.User, date *database.Date) (string, bool) {
+	log.Debug("ManualStrategy#FetchCommit()", "user", user, "date", date)
+
 	commit, _ := s.cm.FindCommitByUserIdAndDate(user.ID, date)
 
 	if commit == nil {

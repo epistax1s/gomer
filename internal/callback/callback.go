@@ -23,14 +23,16 @@ func (b *BaseCallback) GetType() string {
 Common callbacks.
 */
 const (
-	PREV         = "prev"    // pagination
-	NEXT         = "next"    // pagination
-	SWAP         = "swap"    // swap 2 entities
-	ADD          = "add"     // add new entity
-	SELECT       = "select"  // select entity
-	DELETE       = "delete"  // delete entity
-	BACK_TO_LIST = "bt_list" // back to the list of entities
-	EXIT         = "exit"
+	PREV           = "prev"    // pagination
+	NEXT           = "next"    // pagination
+	SWAP           = "swap"    // swap 2 entities
+	ADD            = "add"     // add new entity
+	SELECT         = "select"  // select entity
+	DELETE         = "delete"  // delete entity
+	BACK_TO_LIST   = "bt_list" // back to the list of entities
+	EXIT           = "exit"
+	ACTION_CONFIRM = "a_confirm"
+	ACTION_CANCEL  = "a_cancel"
 )
 
 type PrevCallback struct {
@@ -333,6 +335,22 @@ func NewCalendarDateCallback(date string) string {
 	)
 }
 
+func NewActionConfirmCallback() string {
+	return Encode(
+		&BaseCallback{
+			Type: ACTION_CONFIRM,
+		},
+	)
+}
+
+func NewActionCancelCallback() string {
+	return Encode(
+		&BaseCallback{
+			Type: ACTION_CANCEL,
+		},
+	)
+}
+
 func Encode(с Callback) string {
 	data, err := json.Marshal(с)
 	if err != nil {
@@ -377,11 +395,11 @@ func Decode(data string) (Callback, error) {
 	case DELETE:
 		var result DeleteCallback
 		err := json.Unmarshal([]byte(data), &result)
-		return &result, err		
+		return &result, err
 	case BACK_TO_LIST:
 		var result ListCallback
 		err := json.Unmarshal([]byte(data), &result)
-		return &result, err	
+		return &result, err
 	case AG_PREV:
 		var result AGPrevCallback
 		err := json.Unmarshal([]byte(data), &result)
@@ -412,6 +430,14 @@ func Decode(data string) (Callback, error) {
 		return &result, err
 	case CALENDAR_DATE:
 		var result CalendarDateCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case ACTION_CONFIRM:
+		var result BaseCallback
+		err := json.Unmarshal([]byte(data), &result)
+		return &result, err
+	case ACTION_CANCEL:
+		var result BaseCallback
 		err := json.Unmarshal([]byte(data), &result)
 		return &result, err
 	}

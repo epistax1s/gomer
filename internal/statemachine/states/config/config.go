@@ -9,6 +9,7 @@ const (
 	cmdManualSrc     = "manual"
 	cmdRedmineSrc    = "redmine"
 	cmdRedmineExtSrc = "redmine_ext"
+	cmdRedmineID     = "redmine_id"
 )
 
 type ConfigState struct {
@@ -29,6 +30,7 @@ func NewConfigState(server *server.Server, stateMachine *StateMachine, data *Sta
 		cmdManualSrc:     state.manualHandler,
 		cmdRedmineSrc:    state.redmineHandler,
 		cmdRedmineExtSrc: state.redmineExtHandler,
+		cmdRedmineID:     state.redmineID,
 	}
 
 	return state

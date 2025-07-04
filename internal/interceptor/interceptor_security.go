@@ -21,15 +21,17 @@ func (i *SecurityInterceptor) Handle(update *tgbotapi.Update) {
 
 	gomer := i.Server.Gomer
 
-	chat :=update.FromChat()
-
+	chat := update.FromChat()
 	chatID := chat.ID
 	username := chat.UserName
 	name := chat.FirstName + chat.LastName
 
 	securityService := i.Server.SecurityService
 
-	if update.Message != nil && update.Message.Command() == "start" {
+	// Registration flow for new users
+	isRegistered := securityService.IsRegistered(chatID)
+	// TODO extract to Utils
+	if !isRegistered && update.Message != nil && update.Message.Command() == "start" {
 		// Registration flow with invite code
 		inviteCode := update.Message.CommandArguments()
 		if inviteCode == "" {

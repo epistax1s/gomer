@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 
 	"github.com/epistax1s/gomer/internal/model"
@@ -29,6 +31,10 @@ func (repo *departRepository) FindById(id int64) (*model.Department, error) {
 
 func (repo *departRepository) FindAll() ([]model.Department, error) {
 	var departments []model.Department
-	result := repo.db.Find(&departments)
+	result := repo.db.
+		Debug().
+		Where(fmt.Sprintf("%s != ?", model.DepartmentTypeColumn), model.DepartmentTypeSystem).
+		First(&departments)
+
 	return departments, result.Error
 }

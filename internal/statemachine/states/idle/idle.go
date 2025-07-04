@@ -13,7 +13,7 @@ const (
 	cmdCommit         = "commit"
 	cmdCommitModify   = "commit_modify"
 	cmdConfig         = "config"
-	cmdForcePublish   = "force_publish"
+	cmdForcePublish   = "publish"
 	cmdManageUsers    = "manage_users"
 	cmdManageGroups   = "manage_groups"
 	cmdMyInvites      = "invites"

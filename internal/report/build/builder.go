@@ -8,6 +8,7 @@ import (
 
 	"github.com/epistax1s/gomer/internal/database"
 	"github.com/epistax1s/gomer/internal/i18n"
+	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/model"
 	"github.com/epistax1s/gomer/internal/redmine"
 	"github.com/epistax1s/gomer/internal/report/build/strategy"
@@ -40,6 +41,7 @@ func NewReportBuilder(
 func (rb *ReportBuilder) BuildDailyReport(buildDate *database.Date, publishDate *database.Date) ([]string, error) {
 	users, err := rb.userService.FindAllActive()
 	if err != nil {
+		log.Warn("no active users found", "ctx", "ReportBuilder#BuildDailyReport()")
 		return nil, err
 	}
 

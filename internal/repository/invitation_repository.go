@@ -24,7 +24,7 @@ func NewInvitationRepository(db *gorm.DB) InvitationRepository {
 }
 
 func (repo *invitationRepository) Create(invitation *model.Invitation) error {
-	return repo.db.Create(invitation).Error
+	return repo.db.Debug().Create(invitation).Error
 }
 
 func (repo *invitationRepository) FindByCode(code string) (*model.Invitation, error) {

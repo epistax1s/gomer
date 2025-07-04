@@ -12,13 +12,13 @@ import (
 
 type UserService interface {
 	Create(*model.User) error
+	Save(*model.User) error
 	FindUserByChatID(int64) (*model.User, error)
 	FindPaginated(page int, pageSize int) ([]model.User, error)
 	FindAll() ([]model.User, error)
 	FindAllActive() ([]model.User, error)
 	TrackUser(*model.User) error
 	UntrackUser(int64) error
-	SetCommitSrc(chatID int64, commitSrc string) error
 	UserExists(int64) (bool, error)
 }
 
@@ -34,6 +34,10 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 
 func (service *userService) Create(user *model.User) error {
 	return service.userRepo.Create(user)
+}
+
+func (service *userService) Save(user *model.User) error {
+	return service.userRepo.Update(user)
 }
 
 func (service *userService) FindUserByChatID(chatID int64) (*model.User, error) {
@@ -108,33 +112,6 @@ func (service *userService) UntrackUser(chatID int64) error {
 	log.Info(
 		"the user is no longer being tracked",
 		"chatID", chatID)
-
-	return nil
-}
-
-func (service *userService) SetCommitSrc(chatID int64, commitSrc string) error {
-	user, err := service.FindUserByChatID(chatID)
-	if err != nil {
-		log.Error(
-			"error updating commitSrc for user",
-			"chatID", chatID, "commitSrc", commitSrc, "err", err)
-
-		return err
-	}
-
-	user.CommitSrc = commitSrc
-
-	if err := service.userRepo.Update(user); err != nil {
-		log.Error(
-			"error updating commitSrc for user",
-			"chatID", chatID, "commitSrc", commitSrc, "err", err)
-
-		return err
-	}
-
-	log.Info(
-		"commitSrc successfully updated for user",
-		"chatID", chatID, "commitSrc", commitSrc)
 
 	return nil
 }

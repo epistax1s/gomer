@@ -20,7 +20,6 @@ type Server struct {
 	CommitService     service.CommitService
 	DepartService     service.DepartService
 	GroupService      service.GroupService
-	FullCommitService service.FullCommitService
 	InvitationService service.InvitationService
 	Config            *config.Config
 	Gomer             *gomer.Gomer
@@ -80,10 +79,6 @@ func InitServer() *Server {
 		repository.NewGroupRepository(db),
 	)
 
-	reportService := service.NewFullCommitService(
-		repository.NewFullCommit(db),
-	)
-
 	redmineClient := redmine.NewRedmineClient("https://red.eltex.loc", "token")
 
 	reportBuilder := build.NewReportBuilder(
@@ -114,7 +109,6 @@ func InitServer() *Server {
 		CommitService:     commitService,
 		DepartService:     departService,
 		GroupService:      groupService,
-		FullCommitService: reportService,
 		InvitationService: invitationService,
 		Config:            config,
 		Gomer:             gomer,

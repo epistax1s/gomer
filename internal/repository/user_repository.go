@@ -82,6 +82,7 @@ func (repo *userRepository) FindByChatID(chatID int64) (*model.User, error) {
 	var user model.User
 
 	result := repo.db.
+		Debug().
 		Where(fmt.Sprintf("%s = ?", model.UserChatIDColumn), chatID).
 		First(&user)
 

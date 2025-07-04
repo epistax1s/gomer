@@ -40,10 +40,13 @@ func (state *ManageGroupsState) Handle(update *tgbotapi.Update) {
 	query := update.CallbackQuery
 
 	if query != nil {
-		queryData := query.Data
-		callback, err := callback.Decode(queryData)
+		// confirm receipt CallbackQuery
+		gomer.SendCallbackResponse(query, i18n.Localize("ok"))
+		
+		callback, err := callback.Decode(query.Data)
 		if err != nil {
 			log.Error(err.Error())
+			gomer.SendMessage(chatID, i18n.Localize("oops"))
 		}
 		state.handlers[callback.GetType()](update, callback)
 	} else {

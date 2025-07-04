@@ -6,7 +6,7 @@ type Invitation struct {
 	CreatedByID int64   `gorm:"column:created_by_user_id;not null"`
 	CreatedBy   User    `gorm:"foreignKey:CreatedByID;references:ID"`
 	CreatedAt   string  `gorm:"column:created_at;not null"`
-	Used        bool    `gorm:"column:used;not null;default:true"`
+	Used        bool    `gorm:"column:used;not null;"`
 	UsedByID    *int64  `gorm:"column:used_by_user_id"`
 	UsedBy      *User   `gorm:"foreignKey:UsedByID;references:ID"`
 	UsedAt      *string `gorm:"column:used_at"`

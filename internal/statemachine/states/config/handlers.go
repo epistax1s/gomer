@@ -15,19 +15,39 @@ import (
 
 func (state *ConfigState) Init(update *tgbotapi.Update) {
 	gomer := state.server.Gomer
+	userService := state.server.UserService
 	chatID := update.FromChat().ID
 
+	user, _ := userService.FindUserByChatID(chatID)
+	userCommitSrc := fmt.Sprintf(i18n.Localize("profileCommitSrc_html"), user.CommitSrc)
+	userRedmineID := fmt.Sprintf(i18n.Localize("profileRedmineID_html"), user.RedmineID)
+
 	msg := fmt.Sprintf(""+
+		"%s\n\n"+ // Profile title
+		"%s\n"+
+		"%s\n\n"+
+		"%s\n\n"+ // Commit source title
 		"/manual - %s\n"+
 		"/redmine - %s\n"+
-		"/redmine_ext - %s\n"+
+		"/redmine_ext - %s\n\n"+
+		"%s\n\n"+ // Redmine id title
+		"/redmine_id - %s\n\n"+
+		"%s\n\n"+ // Other title
 		"/cancel - %s\n",
+		i18n.Localize("profileTitle_html"),
+		userCommitSrc,
+		userRedmineID,
+		i18n.Localize("commitSrcTitle_html"),
 		i18n.Localize("commitSrcManualDescription"),
 		i18n.Localize("commitSrcRedmineDescription"),
 		i18n.Localize("commitSrcRedmineExtDescription"),
-		i18n.Localize("commitSrcCancelDescription"))
+		i18n.Localize("redmineIdTitle_html"),
+		i18n.Localize("redmineIdDescription"),
+		i18n.Localize("confOtherTitle_html"),
+		i18n.Localize("confCancelDescription"),
+	)
 
-	gomer.SendMessage(chatID, msg)
+	gomer.SendMessageHtml(chatID, msg)
 }
 
 func (state *ConfigState) Handle(update *tgbotapi.Update) {
@@ -63,19 +83,16 @@ func (state *ConfigState) changeCommitSrc(update *tgbotapi.Update, commitSrc str
 
 	chatID := update.FromChat().ID
 
-	if err := userService.SetCommitSrc(chatID, commitSrc); err != nil {
-		log.Error(
-			"error trying to change commitSrc for user",
-			"chatID", chatID, "state", Config, "commitSrc", commitSrc, "err", err)
-
-		gomer.SendMessage(chatID, i18n.Localize("oops"))
-
-		state.stateMachine.
-			Set(Idle, chatID, &StateContext{}).
-			Handle(update)
-
+	redmineSrc := commitSrc == model.UserCommitSrcRedmine || commitSrc == model.UserCommitSrcRedmineExt
+	user, _ := userService.FindUserByChatID(chatID)
+	if redmineSrc && user.RedmineID == 0 {
+		gomer.SendMessage(chatID, i18n.Localize("redmineIdRequired"))
+		state.Init(update)
 		return
 	}
+
+	user.CommitSrc = commitSrc
+	userService.Save(user)
 
 	log.Info(
 		"commitSrc changed successfully",
@@ -87,5 +104,11 @@ func (state *ConfigState) changeCommitSrc(update *tgbotapi.Update, commitSrc str
 
 	state.stateMachine.
 		Set(Idle, chatID, &StateContext{}).
+		Init(update)
+}
+
+func (state *ConfigState) redmineID(update *tgbotapi.Update, callback callback.Callback) {
+	state.stateMachine.
+		Set(RedmineID, update.FromChat().ID, &StateContext{}).
 		Init(update)
 }

@@ -10,9 +10,10 @@ import (
 	"github.com/epistax1s/gomer/internal/statemachine/states/name"
 	"github.com/epistax1s/gomer/internal/statemachine/states/publish"
 
-	commit_modify "github.com/epistax1s/gomer/internal/statemachine/states/commitmodify"
-	manage_groups "github.com/epistax1s/gomer/internal/statemachine/states/managegroups"
-	manage_users "github.com/epistax1s/gomer/internal/statemachine/states/manageusers"
+	commit_modify "github.com/epistax1s/gomer/internal/statemachine/states/commit_modify"
+	manage_groups "github.com/epistax1s/gomer/internal/statemachine/states/manage_groups"
+	manage_users "github.com/epistax1s/gomer/internal/statemachine/states/manage_users"
+	redmine_id "github.com/epistax1s/gomer/internal/statemachine/states/redmin_id"
 
 	. "github.com/epistax1s/gomer/internal/statemachine/core"
 )
@@ -28,8 +29,9 @@ func NewStateMachine(server *server.Server) *StateMachine {
 			Date:            date.NewDateState,
 			Commit:          commit.NewCommitState,
 			CommitModify:    commit_modify.NewCommitModifyState,
-			Config:			 config.NewConfigState,
+			Config:          config.NewConfigState,
 			ForcePublish:    publish.NewForcePublishState,
+			RedmineID:       redmine_id.NewRedmineIDState,
 			ManageUsers:     manage_users.NewManageUsersState,
 			ManageGrops:     manage_groups.NewManageGroupsState,
 		},

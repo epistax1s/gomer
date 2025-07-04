@@ -10,6 +10,12 @@ func (gomer *Gomer) SendMessage(chatID int64, text string) {
 	gomer.Send(msg)
 }
 
+func (gomer *Gomer) SendMessageHtml(chatID int64, text string) {
+	msg := tgbotapi.NewMessage(chatID, text)
+	msg.ParseMode = "HTML"
+	gomer.Send(msg)
+}
+
 func (gomer *Gomer) SendMessageWithKeyboard(chatID int64, text string, markup *tgbotapi.InlineKeyboardMarkup) {
 	msg := tgbotapi.NewMessage(chatID, text)
 	msg.ReplyMarkup = markup

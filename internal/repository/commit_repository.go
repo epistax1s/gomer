@@ -12,8 +12,8 @@ import (
 type CommitRepository interface {
 	Create(*model.Commit) error
 	Update(*model.Commit) error
-	FindById(int64) (*model.Commit, error)
-	FindByUserIdAndDate(int64, *database.Date) (*model.Commit, error)
+	FindByID(int64) (*model.Commit, error)
+	FindByUserIDAndDate(int64, *database.Date) (*model.Commit, error)
 	FindAllByDate(*database.Date) ([]model.Commit, error)
 }
 
@@ -35,16 +35,17 @@ func (repo *commitRepository) Update(commit *model.Commit) error {
 	return repo.db.Updates(commit).Error
 }
 
-func (repo *commitRepository) FindById(id int64) (*model.Commit, error) {
+func (repo *commitRepository) FindByID(id int64) (*model.Commit, error) {
 	var commit model.Commit
 	result := repo.db.First(&commit, id)
 	return &commit, result.Error
 }
 
-func (repo *commitRepository) FindByUserIdAndDate(userID int64, date *database.Date) (*model.Commit, error) {
+func (repo *commitRepository) FindByUserIDAndDate(userID int64, date *database.Date) (*model.Commit, error) {
 	var commit model.Commit
 
 	result := repo.db.
+		Debug().
 		Where(fmt.Sprintf("%s = ? AND %s = ?", model.CommitUserIDColumn, model.CommitDateColumn), userID, date).
 		First(&commit)
 

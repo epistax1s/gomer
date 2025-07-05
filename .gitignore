@@ -28,9 +28,6 @@ go.work.sum
 *.code-workspace
 .vscode/
 
-# Bot config (n this case, the config_template should be visible to everyone)
-config/config.json
-
 # Logs (storing logs in the project structure is convenient for development)
 log/*.log
 

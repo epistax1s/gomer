@@ -1,41 +1,99 @@
 package config
 
 import (
-	"encoding/json"
+	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type Config struct {
-	Report ReportConfig `json:"report"`
-	Bot    BotConfig    `json:"bot"`
-	Log    LogConfig    `json:"log"`
+	Report  ReportConfig
+	Bot     BotConfig
+	Redmine RedmineConfig
+	Log     LogConfig
 }
 
 type ReportConfig struct {
-	PublishCron      string `json:"publishCron"`
-	NotificationCron string `json:"notificationCron"`
+	PublishCron      string
+	NotificationCron string
 }
 
 type BotConfig struct {
-	Token string `json:"token"`
+	Token string
+}
+
+type RedmineConfig struct {
+	BaseURL  string
+	ApiKey   string
+	Comments RedmineComments
+}
+
+type RedmineComments struct {
+	Exclude []string
 }
 
 type LogConfig struct {
-	Level  string `json:"level"`
-	Stdout bool   `json:"stdout"`
+	Level  string
+	Stdout bool
 }
 
+// LoadConfig loads configuration from environment variables
 func LoadConfig() (*Config, error) {
-	bytes, err := os.ReadFile("./config/config.json")
-	if err != nil {
-		return nil, err
+	config := &Config{
+		Report: ReportConfig{
+			PublishCron:      getEnvRequired("REPORT_PUBLISH_CRON"),
+			NotificationCron: getEnvRequired("REPORT_NOTIFICATION_CRON"),
+		},
+		Bot: BotConfig{
+			Token: getEnvRequired("BOT_TOKEN"),
+		},
+		Redmine: RedmineConfig{
+			BaseURL: getEnvRequired("REDMINE_BASE_URL"),
+			ApiKey:  getEnvRequired("REDMINE_API_KEY"),
+			Comments: RedmineComments{
+				Exclude: getEnvSliceRequired("REDMINE_COMMENTS_EXCLUDE", []string{
+					"^митинг",
+					"^ежедневный митинг",
+					"^дейли",
+					"^дэйли",
+					"^daily",
+				}),
+			},
+		},
+		Log: LogConfig{
+			Level:  getEnvRequired("LOG_LEVEL"),
+			Stdout: getEnvRequiredBool("LOG_STDOUT"),
+		},
 	}
 
-	var config Config
-	err = json.Unmarshal(bytes, &config)
-	if err != nil {
-		return nil, err
-	}
+	return config, nil
+}
 
-	return &config, nil
+// Helper functions for environment variables
+func getEnvRequired(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		panic(fmt.Sprintf("Required environment variable %s is not set", key))
+	}
+	return value
+}
+
+func getEnvRequiredBool(key string) bool {
+	value := os.Getenv(key)
+	if value == "" {
+		panic(fmt.Sprintf("Required environment variable %s is not set", key))
+	}
+	if boolValue, err := strconv.ParseBool(value); err == nil {
+		return boolValue
+	} else {
+		panic(fmt.Sprintf("Environment variable %s must be a valid boolean value (true/false, 1/0, yes/no), got: %s", key, value))
+	}
+}
+
+func getEnvSliceRequired(key string, defaultValue []string) []string {
+	if value := os.Getenv(key); value != "" {
+		return strings.Split(value, ",")
+	}
+	return defaultValue
 }

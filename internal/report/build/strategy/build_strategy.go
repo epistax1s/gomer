@@ -6,5 +6,5 @@ import (
 )
 
 type CommitSourceStrategy interface {
-    FetchCommit(user *model.User, date *database.Date) (string, bool)
+    FetchCommit(user *model.User, date *database.Date) string
 }

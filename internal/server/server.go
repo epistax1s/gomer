@@ -67,7 +67,7 @@ func InitServer() *Server {
 	securityService := service.NewSecurityService(userService, invitationService, db)
 
 	commitService := service.NewCommitService(
-		userService, 
+		userService,
 		repository.NewCommitRepository(db),
 	)
 
@@ -79,13 +79,14 @@ func InitServer() *Server {
 		repository.NewGroupRepository(db),
 	)
 
-	redmineClient := redmine.NewRedmineClient("https://red.eltex.loc", "token")
+	redmineClient := redmine.NewRedmineClient(&config.Redmine)
 
 	reportBuilder := build.NewReportBuilder(
 		userService,
 		commitService,
 		redmineClient,
 		4096,
+		config.Redmine.Comments.Exclude,
 	)
 
 	reportPublisher := publish.NewReportPublisher(

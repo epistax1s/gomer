@@ -11,7 +11,7 @@ const (
 	cmdTrack          = "track"
 	cmdUntrack        = "untrack"
 	cmdCommit         = "commit"
-	cmdCommitModify   = "commit_modify"
+	cmdCommitModify   = "modify"
 	cmdConfig         = "config"
 	cmdForcePublish   = "publish"
 	cmdManageUsers    = "manage_users"

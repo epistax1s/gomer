@@ -1,13 +1,49 @@
 # Gomer
 
-Run:
+Telegram bot for team management and reporting.
 
+## Quick Start
+
+### Using Docker Compose
+
+1. Copy environment template:
 ```bash
-docker compose up
+cp env.example .env
 ```
 
-- [ ] Вынести system UserID в переменную
-- [ ] Изменить порядок логов в Server
-- [ ] Путь до БД вынести в переменную
-- [ ] Решить что делать с логгером и конфигом для CLI и Gomer'а
-- [ ] Написать логи в инициализаторе CLI
+2. Configure your environment variables in `.env` file
+
+3. Run:
+```bash
+docker compose up -d
+```
+
+### Local Development
+
+1. Copy environment template:
+```bash
+cp env.example .env
+```
+
+2. Configure your environment variables in `.env` file
+
+3. Load environment and run:
+```bash
+source scripts/load-env.sh
+go run ./cmd/gomer/main.go
+```
+
+## Configuration
+
+See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
+
+## Features
+
+- [ ] Make a maximum of 3 invitation links available.
+- [ ] Arrange the display of invitation links.
+- [ ] Add a description to commitSrc.
+- [ ] Add the ee flag.
+- [ ] Migrate data to a new structure.
+- [ ] Optimize the image size.
+- [ ] Deploy the bot on Proxmox.
+

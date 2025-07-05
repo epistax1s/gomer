@@ -6,6 +6,10 @@
     "bot" : {
         "token": ""
     },
+    "redmine" : {
+        "baseUrl" : "",
+        "apiKey" : ""
+    },
     "log" : {
         "level" : "debug",
         "stdout" : true

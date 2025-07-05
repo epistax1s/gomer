@@ -17,7 +17,7 @@ func (state *CommitModifyState) Init(update *tgbotapi.Update) {
 
 	chatID := update.FromChat().ID
 
-	commit, err := commitService.FindCommitByUserIdAndDate(chatID, state.data.SelectedDate)
+	commit, err := commitService.FindByChatIDAndDate(chatID, state.data.SelectedDate)
 	if err != nil {
 		log.Error(
 			"error when searching for a commit",

@@ -62,6 +62,7 @@ func (repo *userRepository) FindAllActive() ([]model.User, error) {
 	var users []model.User
 	
 	result := repo.db.
+		Preload("Department").
 		Where(fmt.Sprintf("%s = ?", model.UserStatusColumn), model.UserStatusActive).
 		Find(&users)
 

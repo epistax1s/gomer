@@ -5,8 +5,21 @@ services:
     container_name: gomer-container
     restart: always
     volumes: 
-      - ./config:/app/config
       - ./database:/app/database
       - ./log:/app/log
     environment:
       - TZ=Asia/Krasnoyarsk
+      # Report Settings
+      - REPORT_PUBLISH_CRON=${GOMER_REPORT_PUBLISH_CRON}
+      - REPORT_NOTIFICATION_CRON=${REPORT_NOTIFICATION_CRON}
+      # Bot Settings
+      - BOT_TOKEN=${BOT_TOKEN}
+      # Redmine Settings
+      - REDMINE_BASE_URL=${REDMINE_BASE_URL}
+      - REDMINE_API_KEY=${REDMINE_API_KEY}
+      - REDMINE_COMMENTS_EXCLUDE=${REDMINE_COMMENTS_EXCLUDE}
+      # Log Settings
+      - LOG_LEVEL=${LOG_LEVEL}
+      - LOG_STDOUT=${LOG_STDOUT}
+    env_file:
+      - .env

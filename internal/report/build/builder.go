@@ -26,15 +26,17 @@ func NewReportBuilder(
 	cs service.CommitService,
 	rc *redmine.RedmineClient,
 	messageMaxSize int64,
+	excludePatterns []string,
 ) *ReportBuilder {
 
 	return &ReportBuilder{
 		userService: us,
 		strategies: map[string]strategy.CommitSourceStrategy{
 			model.UserCommitSrcManual:     strategy.NewManualStrategy(cs),
-			model.UserCommitSrcRedmine:    strategy.NewRedmineStrategy(rc),
-			model.UserCommitSrcRedmineExt: strategy.NewRedmineExtStrategy(rc),
+			model.UserCommitSrcRedmine:    strategy.NewRedmineStrategy(rc, excludePatterns),
+			model.UserCommitSrcRedmineExt: strategy.NewRedmineExtStrategy(rc, excludePatterns),
 		},
+		messageMaxSize: messageMaxSize,
 	}
 }
 
@@ -71,17 +73,12 @@ func (rb *ReportBuilder) BuildDailyReport(buildDate *database.Date, publishDate 
 			strategy = rb.strategies[model.UserCommitSrcManual] // default to manual
 		}
 
-		commitPayload, commitExists := strategy.FetchCommit(&user, buildDate)
-		if !commitExists {
-			commitPayload = "- " + i18n.Localize("commitDidntSent")
-			continue
-		}
-
+		commit := strategy.FetchCommit(&user, buildDate)
 		segmentBuilder.WriteString(user.Name)
 		segmentBuilder.WriteString(" @")
 		segmentBuilder.WriteString(user.Username)
 		segmentBuilder.WriteString(":\n")
-		segmentBuilder.WriteString(commitPayload)
+		segmentBuilder.WriteString(commit)
 		segmentBuilder.WriteString("\n\n")
 
 		if rb.isMessageFilled(&messageBuilder, &segmentBuilder) {

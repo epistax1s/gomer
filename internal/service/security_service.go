@@ -118,6 +118,7 @@ func (service *securityService) RegisterUser(chatID int64, username string, name
 		Status:    model.UserStatusLimbo,
 		Role:      model.UserRoleUser,
 		CommitSrc: model.UserCommitSrcManual,
+		EE:        false,
 	}
 
 	if err := service.userService.Create(user); err != nil {

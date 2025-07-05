@@ -13,6 +13,7 @@ type User struct {
 	Role         string     `gorm:"column:role"`
 	Status       string     `gorm:"column:status"`
 	CommitSrc    string     `gorm:"column:commit_src"`
+	EE           bool      	`gorm:"column:ee"`
 }
 
 const (

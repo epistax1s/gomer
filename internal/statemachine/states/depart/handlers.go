@@ -34,6 +34,14 @@ func (state *TrackDepartmentState) Init(update *tgbotapi.Update) {
 			Init(update)
 	}
 
+	if len(departments) == 0 {
+		gomer.SendMessage(chatID, i18n.Localize("chooseDepartmentNotFound"))
+
+		state.stateMachine.
+			Set(Idle, chatID, &StateContext{}).
+			Init(update)
+	}
+
 	// creating an inline keyboard for selecting a department
 	var departmentMarkup tgbotapi.InlineKeyboardMarkup
 	for _, dep := range departments {

@@ -45,7 +45,6 @@ func (repo *commitRepository) FindByUserIDAndDate(userID int64, date *database.D
 	var commit model.Commit
 
 	result := repo.db.
-		Debug().
 		Where(fmt.Sprintf("%s = ? AND %s = ?", model.CommitUserIDColumn, model.CommitDateColumn), userID, date).
 		First(&commit)
 

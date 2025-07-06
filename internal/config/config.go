@@ -20,7 +20,8 @@ type ReportConfig struct {
 }
 
 type BotConfig struct {
-	Token string
+	Username string
+	Token    string
 }
 
 type RedmineConfig struct {
@@ -46,7 +47,8 @@ func LoadConfig() (*Config, error) {
 			NotificationCron: getEnvRequired("REPORT_NOTIFICATION_CRON"),
 		},
 		Bot: BotConfig{
-			Token: getEnvRequired("BOT_TOKEN"),
+			Username: getEnvRequired("BOT_USERNAME"),
+			Token:    getEnvRequired("BOT_TOKEN"),
 		},
 		Redmine: RedmineConfig{
 			BaseURL: getEnvRequired("REDMINE_BASE_URL"),

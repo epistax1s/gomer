@@ -32,9 +32,8 @@ func (repo *departRepository) FindById(id int64) (*model.Department, error) {
 func (repo *departRepository) FindAll() ([]model.Department, error) {
 	var departments []model.Department
 	result := repo.db.
-		Debug().
 		Where(fmt.Sprintf("%s != ?", model.DepartmentTypeColumn), model.DepartmentTypeSystem).
-		First(&departments)
+		Find(&departments)
 
 	return departments, result.Error
 }

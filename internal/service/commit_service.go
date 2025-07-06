@@ -36,7 +36,7 @@ func (service *commitService) FindByUserIDAndDate(userID int64, date *database.D
 	commit, err := service.commitRepo.FindByUserIDAndDate(userID, date)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Info(
+			log.Debug(
 				"commit not found",
 				"userID", userID, "commitDate", date)
 

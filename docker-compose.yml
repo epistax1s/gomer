@@ -4,15 +4,16 @@ services:
     image: gomer:latest
     container_name: gomer-container
     restart: always
-    volumes: 
-      - ./database:/app/database
-      - ./log:/app/log
+    volumes:
+      - /opt/gomer/database:/app/database
+      - /opt/gomer/log:/app/log
     environment:
       - TZ=Asia/Krasnoyarsk
       # Report Settings
-      - REPORT_PUBLISH_CRON=${GOMER_REPORT_PUBLISH_CRON}
+      - REPORT_PUBLISH_CRON=${REPORT_PUBLISH_CRON}
       - REPORT_NOTIFICATION_CRON=${REPORT_NOTIFICATION_CRON}
       # Bot Settings
+      - BOT_USERNAME=${BOT_USERNAME}
       - BOT_TOKEN=${BOT_TOKEN}
       # Redmine Settings
       - REDMINE_BASE_URL=${REDMINE_BASE_URL}

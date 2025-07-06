@@ -36,14 +36,3 @@ go run ./cmd/gomer/main.go
 ## Configuration
 
 See [CONFIGURATION.md](CONFIGURATION.md) for detailed configuration options.
-
-## Features
-
-- [ ] Make a maximum of 3 invitation links available.
-- [ ] Arrange the display of invitation links.
-- [ ] Add a description to commitSrc.
-- [ ] Add the ee flag.
-- [ ] Migrate data to a new structure.
-- [ ] Optimize the image size.
-- [ ] Deploy the bot on Proxmox.
-

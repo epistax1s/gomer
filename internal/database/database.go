@@ -6,5 +6,5 @@ import (
 )
 
 func InitDatabase() (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open("./database/gomer.db"), &gorm.Config{})
+	return gorm.Open(sqlite.Open("/app/database/gomer.db"), &gorm.Config{})
 }

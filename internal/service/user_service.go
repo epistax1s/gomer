@@ -44,7 +44,7 @@ func (service *userService) FindUserByChatID(chatID int64) (*model.User, error) 
 	user, err := service.userRepo.FindByChatID(chatID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Info(
+			log.Debug(
 				"the user by chat Id was not found",
 				"chatID", chatID)
 

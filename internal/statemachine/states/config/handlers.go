@@ -27,9 +27,10 @@ func (state *ConfigState) Init(update *tgbotapi.Update) {
 		"%s\n"+
 		"%s\n\n"+
 		"%s\n\n"+ // Commit source title
-		"/manual - %s\n"+
-		"/redmine - %s\n"+
+		"/manual - %s\n\n"+
+		"/redmine - %s\n\n"+
 		"/redmine_ext - %s\n\n"+
+		"/examples - %s\n\n"+
 		"%s\n\n"+ // Redmine id title
 		"/redmine_id - %s\n\n"+
 		"%s\n\n"+ // Other title
@@ -41,6 +42,7 @@ func (state *ConfigState) Init(update *tgbotapi.Update) {
 		i18n.Localize("commitSrcManualDescription"),
 		i18n.Localize("commitSrcRedmineDescription"),
 		i18n.Localize("commitSrcRedmineExtDescription"),
+		i18n.Localize("commitSrcExamplesDescription"),
 		i18n.Localize("redmineIdTitle_html"),
 		i18n.Localize("redmineIdDescription"),
 		i18n.Localize("confOtherTitle_html"),
@@ -77,6 +79,13 @@ func (state *ConfigState) redmineExtHandler(update *tgbotapi.Update, callback ca
 	state.changeCommitSrc(update, model.UserCommitSrcRedmineExt)
 }
 
+func (state *ConfigState) examplesHandler(update *tgbotapi.Update, callback callback.Callback) {
+	state.server.Gomer.SendMessageHtml(
+		update.FromChat().ID,
+		i18n.Localize("commitSrcExamples_html"),
+	)
+}
+
 func (state *ConfigState) changeCommitSrc(update *tgbotapi.Update, commitSrc string) {
 	gomer := state.server.Gomer
 	userService := state.server.UserService
@@ -85,7 +94,7 @@ func (state *ConfigState) changeCommitSrc(update *tgbotapi.Update, commitSrc str
 
 	redmineSrc := commitSrc == model.UserCommitSrcRedmine || commitSrc == model.UserCommitSrcRedmineExt
 	user, _ := userService.FindUserByChatID(chatID)
-	if redmineSrc && user.RedmineID == 0 {
+	if redmineSrc && user.RedmineID == nil {
 		gomer.SendMessage(chatID, i18n.Localize("redmineIdRequired"))
 		state.Init(update)
 		return

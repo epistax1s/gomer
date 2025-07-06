@@ -29,14 +29,6 @@ func NewGroupService(groupRepo repository.GroupRepository) GroupService {
 }
 
 func (service *groupService) LinkGroup(groupID int64, title string) error {
-	if group, _ := service.FindByGroupID(groupID); group != nil {
-		log.Info(
-			"The group is already linked to the bot",
-			"groupID", groupID, "title", title)
-
-		return nil
-	}
-
 	return service.groupRepo.Create(
 		&model.Group{
 			GroupID: groupID,

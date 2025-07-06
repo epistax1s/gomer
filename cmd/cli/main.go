@@ -11,7 +11,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gomer-cli",
+	Use:   "gocli",
 	Short: "Gomer CLI - management tool for Gomer",
 	Long:  `A CLI tool for managing Gomer users, invitations, and roles.`,
 }

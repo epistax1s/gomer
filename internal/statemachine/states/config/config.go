@@ -9,6 +9,7 @@ const (
 	cmdManualSrc     = "manual"
 	cmdRedmineSrc    = "redmine"
 	cmdRedmineExtSrc = "redmine_ext"
+	examples         = "examples"
 	cmdRedmineID     = "redmine_id"
 )
 
@@ -30,6 +31,7 @@ func NewConfigState(server *server.Server, stateMachine *StateMachine, data *Sta
 		cmdManualSrc:     state.manualHandler,
 		cmdRedmineSrc:    state.redmineHandler,
 		cmdRedmineExtSrc: state.redmineExtHandler,
+		examples:         state.examplesHandler,
 		cmdRedmineID:     state.redmineID,
 	}
 

@@ -59,6 +59,14 @@ func (i *HandlerInterceptor) handleFromGroup(update *tgbotapi.Update) {
 			return
 		}
 
+		if group, _ := groupService.FindByGroupID(groupChatID); group != nil {
+			log.Info(
+				"The group is already linked to the bot",
+				"groupID", groupChatID, "title", title)
+	
+			return
+		}
+
 		if err := groupService.LinkGroup(groupChatID, title); err == nil {
 			gomer.SendMessage(groupChatID, i18n.Localize("groupSuccessfullyLinked"))
 		} else {

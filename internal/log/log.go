@@ -13,7 +13,7 @@ var log *slog.Logger
 
 func InitLogger(config *config.LogConfig) {
 	logger := &roll.Logger{
-		Filename:   "./log/gomer.log",
+		Filename:   "/app/log/gomer.log",
 		MaxSize:    2,
 		MaxBackups: 1,
 		MaxAge:     360,

@@ -45,7 +45,7 @@ func (state *RedmineIDState) Handle(update *tgbotapi.Update) {
 	}
 
 	user, _ := userService.FindUserByChatID(chatID)
-	user.RedmineID = redmineID
+	user.RedmineID = &redmineID
 	userService.Save(user)
 
 	gomer.SendMessage(chatID, i18n.Localize("redmineIDSavedSuccess"))

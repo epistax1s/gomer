@@ -25,7 +25,7 @@ func NewRedmineExtStrategy(cl *redmine.RedmineClient, exc []string) *RedmineExtS
 }
 
 func (s *RedmineExtStrategy) FetchCommit(user *model.User, date *database.Date) string {
-	entries, err := s.client.GetTimeEntries(int(user.RedmineID), date.String())
+	entries, err := s.client.GetTimeEntries(int(*user.RedmineID), date.String())
 	if err != nil {
 		log.Error(
 			"Error when uploading a commit from redmine",

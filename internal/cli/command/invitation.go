@@ -29,20 +29,19 @@ var listInvitationsCmd = &cobra.Command{
 
 		table := tablewriter.NewWriter(os.Stdout)
 		table.Header([]string{"Code", "Created At", "Used By", "Used At"})
-		for _, invitation := range invitations {
-			usedBy := "N/A"
-			if invitation.UsedBy != nil {
-				usedBy = invitation.UsedBy.Username
-			}
+		for _, invite := range invitations {
+			link := fmt.Sprintf("https://t.me/%s?start=%s", cli.Config.Bot.Username, invite.Code)
 
+			usedBy := "N/A"
 			usedAt := "N/A"
-			if invitation.UsedAt != nil {
-				usedAt = *invitation.UsedAt
+			if invite.Used {
+				usedBy = invite.UsedBy.Name
+				usedAt = *invite.UsedAt
 			}
 
 			table.Append([]string{
-				invitation.Code,
-				invitation.CreatedAt,
+				link,
+				invite.CreatedAt,
 				usedBy,
 				usedAt,
 			})

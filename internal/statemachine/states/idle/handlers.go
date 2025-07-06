@@ -316,18 +316,24 @@ func (state *IdleState) myInvitesHandler(update *tgbotapi.Update, callback callb
 	}
 
 	var message strings.Builder
-	message.WriteString(i18n.Localize("yourInvites"))
-	message.WriteString("\n\n")
+	message.WriteString(i18n.Localize("yourInvites_html"))
 
+	botUsername := state.server.Config.Bot.Username
 	for _, invite := range invites {
-		message.WriteString(fmt.Sprintf("Code: %s\n", invite.Code))
-		message.WriteString(fmt.Sprintf("Created: %s\n", invite.CreatedAt))
-		if invite.UsedBy != nil {
-			message.WriteString(fmt.Sprintf("Used by: %d\n\n", *invite.UsedByID))
+		link := fmt.Sprintf("https://t.me/%s?start=%s", botUsername, invite.Code)
+		
+		message.WriteString("\n\n")
+		message.WriteString(fmt.Sprintf(i18n.Localize("inviteLink_html"), link))
+		message.WriteString("\n")
+		message.WriteString(fmt.Sprintf(i18n.Localize("inviteCreatedAt_html"), invite.CreatedAt))
+		message.WriteString("\n")
+
+		if invite.Used {
+			message.WriteString(fmt.Sprintf(i18n.Localize("inviteUsedBy_html"), invite.UsedBy.Name))
 		} else {
-			message.WriteString("Used by: -\n\n")
+			message.WriteString(i18n.Localize("inviteNotUsed_html"))
 		}
 	}
 
-	gomer.SendMessage(chatID, message.String())
+	gomer.SendMessageHtml(chatID, message.String())
 }

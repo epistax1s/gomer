@@ -4,7 +4,7 @@ package model
 type User struct {
 	ID           int64      `gorm:"column:id;primaryKey"`
 	ChatID       int64      `gorm:"column:chat_id"`
-	RedmineID    int64      `gorm:"column:redmine_id"`
+	RedmineID    *int64      `gorm:"column:redmine_id"`
 	Name         string     `gorm:"column:name"`
 	Username     string     `gorm:"column:username"`
 	DepartmentID int64      `gorm:"column:department_id;foreignkey:user_department_fk;references:id"`

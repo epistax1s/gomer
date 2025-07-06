@@ -66,7 +66,7 @@ func (service *securityService) IsActive(chatID int64) bool {
 	return user.Status == model.UserStatusActive
 }
 
-func(service *securityService) IsDeleted(chatID int64) bool {
+func (service *securityService) IsDeleted(chatID int64) bool {
 	user, err := service.userService.FindUserByChatID(chatID)
 	if err != nil {
 		log.Error(
@@ -146,7 +146,6 @@ func (service *securityService) AuthenticateUser(chatID int64) (bool, error) {
 }
 
 /*
-*
 Generates an invite link for a user. The link is used to register a new user in the system.
 The link can be used only once.
 */

@@ -21,8 +21,8 @@ RUN go build -ldflags="-s -w" -o gocli ./cmd/cli/main.go
 # Final image
 FROM alpine:3.20
 
-# Install SQLite runtime libraries (needed for dynamically linked builds)
-RUN apk add --no-cache sqlite-libs
+# Install required libraries for SQLite support and correct timezone handling
+RUN apk add --no-cache sqlite-libs tzdata
 
 # Copy both binaries from the builder stage
 COPY --from=builder /app/gomer-server /usr/local/bin/gomer-server

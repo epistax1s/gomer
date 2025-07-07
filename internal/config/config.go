@@ -15,8 +15,8 @@ type Config struct {
 }
 
 type ReportConfig struct {
-	PublishCron      string
 	NotificationCron string
+	PublishCron      string
 }
 
 type BotConfig struct {
@@ -43,8 +43,8 @@ type LogConfig struct {
 func LoadConfig() (*Config, error) {
 	config := &Config{
 		Report: ReportConfig{
-			PublishCron:      getEnvRequired("REPORT_PUBLISH_CRON"),
 			NotificationCron: getEnvRequired("REPORT_NOTIFICATION_CRON"),
+			PublishCron:      getEnvRequired("REPORT_PUBLISH_CRON"),
 		},
 		Bot: BotConfig{
 			Username: getEnvRequired("BOT_USERNAME"),

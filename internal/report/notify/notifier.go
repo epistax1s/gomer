@@ -1,6 +1,9 @@
 package notify
 
 import (
+	"fmt"
+	"time"
+
 	gomer "github.com/epistax1s/gomer/internal/bot"
 	"github.com/epistax1s/gomer/internal/config"
 	"github.com/epistax1s/gomer/internal/database"
@@ -9,7 +12,6 @@ import (
 	"github.com/epistax1s/gomer/internal/report/utils"
 	"github.com/epistax1s/gomer/internal/service"
 	"github.com/robfig/cron/v3"
-	"time"
 )
 
 type ReportNotifier struct {
@@ -63,7 +65,7 @@ func (n *ReportNotifier) Notify(reportDate *database.Date) error {
 	}
 
 	for _, user := range users {
-		n.gomer.SendMessage(user.ChatID, i18n.Localize("notification"))
+		n.gomer.SendMessage(user.ChatID, fmt.Sprintf(i18n.Localize("notification"), reportDate.String()))
 	}
 
 	return nil

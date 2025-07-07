@@ -5,8 +5,8 @@ services:
     container_name: gomer-container
     restart: always
     volumes:
-      - /opt/gomer/database:/app/database
-      - /opt/gomer/log:/app/log
+      - /opt/data/gomer/database:/app/database
+      - /opt/data/gomer/log:/app/log
     environment:
       - TZ=Asia/Krasnoyarsk
       # Report Settings

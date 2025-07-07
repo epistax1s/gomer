@@ -1,6 +1,7 @@
 package redmine
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,7 +23,12 @@ func NewRedmineClient(conf *config.RedmineConfig) *RedmineClient {
 	return &RedmineClient{
 		BaseURL: conf.BaseURL,
 		ApiKey:  conf.ApiKey,
-		Client:  &http.Client{Timeout: 10 * time.Second},
+		Client: &http.Client{
+			Timeout: 30 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		},
 	}
 }
 

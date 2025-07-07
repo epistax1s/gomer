@@ -44,7 +44,7 @@ func (state *RedmineIDState) Handle(update *tgbotapi.Update) {
 		return
 	}
 
-	user, _ := userService.FindUserByChatID(chatID)
+	user, _ := userService.FindByChatID(chatID)
 	user.RedmineID = &redmineID
 	userService.Save(user)
 

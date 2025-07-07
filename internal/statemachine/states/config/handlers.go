@@ -18,7 +18,7 @@ func (state *ConfigState) Init(update *tgbotapi.Update) {
 	userService := state.server.UserService
 	chatID := update.FromChat().ID
 
-	user, _ := userService.FindUserByChatID(chatID)
+	user, _ := userService.FindByChatID(chatID)
 	userCommitSrc := fmt.Sprintf(i18n.Localize("profileCommitSrc_html"), user.CommitSrc)
 	userRedmineID := fmt.Sprintf(i18n.Localize("profileRedmineID_html"), user.RedmineID)
 
@@ -93,7 +93,7 @@ func (state *ConfigState) changeCommitSrc(update *tgbotapi.Update, commitSrc str
 	chatID := update.FromChat().ID
 
 	redmineSrc := commitSrc == model.UserCommitSrcRedmine || commitSrc == model.UserCommitSrcRedmineExt
-	user, _ := userService.FindUserByChatID(chatID)
+	user, _ := userService.FindByChatID(chatID)
 	if redmineSrc && user.RedmineID == nil {
 		gomer.SendMessage(chatID, i18n.Localize("redmineIdRequired"))
 		state.Init(update)

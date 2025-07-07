@@ -39,7 +39,7 @@ Checks if a user is registered in the bot.
 The presence of a user in the database means that the user is registered in the system.
 */
 func (service *securityService) IsRegistered(chatID int64) bool {
-	user, err := service.userService.FindUserByChatID(chatID)
+	user, err := service.userService.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"SecurityService#IsRegistered() Error loading users",
@@ -51,7 +51,7 @@ func (service *securityService) IsRegistered(chatID int64) bool {
 }
 
 func (service *securityService) IsActive(chatID int64) bool {
-	user, err := service.userService.FindUserByChatID(chatID)
+	user, err := service.userService.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"SecurityService#IsActive() Error loading users",
@@ -67,7 +67,7 @@ func (service *securityService) IsActive(chatID int64) bool {
 }
 
 func (service *securityService) IsDeleted(chatID int64) bool {
-	user, err := service.userService.FindUserByChatID(chatID)
+	user, err := service.userService.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"SecurityService#IsDeleted() Error loading users",
@@ -83,7 +83,7 @@ func (service *securityService) IsDeleted(chatID int64) bool {
 }
 
 func (service *securityService) IsAdmin(chatID int64) bool {
-	user, err := service.userService.FindUserByChatID(chatID)
+	user, err := service.userService.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"SecurityService#IsAdmin() Error loading users",
@@ -138,7 +138,7 @@ func (service *securityService) RegisterUser(chatID int64, username string, name
 Authenticates a user by checking if the user exists in the database.
 */
 func (service *securityService) AuthenticateUser(chatID int64) (bool, error) {
-	user, err := service.userService.FindUserByChatID(chatID)
+	user, err := service.userService.FindByChatID(chatID)
 	if err != nil {
 		return false, err
 	}

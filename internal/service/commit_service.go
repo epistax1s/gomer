@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+
 	"github.com/epistax1s/gomer/internal/database"
 	"github.com/epistax1s/gomer/internal/log"
 	"github.com/epistax1s/gomer/internal/model"
@@ -54,7 +55,7 @@ func (service *commitService) FindByUserIDAndDate(userID int64, date *database.D
 }
 
 func (service *commitService) FindByChatIDAndDate(chatID int64, date *database.Date) (*model.Commit, error) {
-	user, err := service.userServices.FindUserByChatID(chatID)
+	user, err := service.userServices.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"commit search, error when searching for a user by chatID",
@@ -75,7 +76,7 @@ func (service *commitService) FindAllByDate(date *database.Date) ([]model.Commit
 }
 
 func (service *commitService) CreateCommit(chatID int64, payload string, date *database.Date) error {
-	user, err := service.userServices.FindUserByChatID(chatID)
+	user, err := service.userServices.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"creating a commit, error when searching for a user",

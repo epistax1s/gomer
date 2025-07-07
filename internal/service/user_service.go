@@ -13,8 +13,8 @@ import (
 type UserService interface {
 	Create(*model.User) error
 	Save(*model.User) error
-	FindUserByChatID(int64) (*model.User, error)
-	FindPaginated(page int, pageSize int) ([]model.User, error)
+	FindByID(int64) (*model.User, error)
+	FindByChatID(int64) (*model.User, error)
 	FindAll() ([]model.User, error)
 	FindAllActive() ([]model.User, error)
 	TrackUser(*model.User) error
@@ -40,7 +40,28 @@ func (service *userService) Save(user *model.User) error {
 	return service.userRepo.Update(user)
 }
 
-func (service *userService) FindUserByChatID(chatID int64) (*model.User, error) {
+func (service *userService) FindByID(id int64) (*model.User, error) {
+	user, err := service.userRepo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Debug(
+				"the user by id was not found",
+				"id", id)
+
+			return nil, nil
+		}
+
+		log.Error(
+			"error when trying to find a user by id",
+			"id", id, "err", err)
+
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (service *userService) FindByChatID(chatID int64) (*model.User, error) {
 	user, err := service.userRepo.FindByChatID(chatID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -61,10 +82,6 @@ func (service *userService) FindUserByChatID(chatID int64) (*model.User, error) 
 	return user, nil
 }
 
-func (service *userService) FindPaginated(page int, pageSize int) ([]model.User, error) {
-	return service.userRepo.FindPaginated(page, pageSize)
-}
-
 func (service *userService) FindAll() ([]model.User, error) {
 	return service.userRepo.FindAll()
 }
@@ -74,7 +91,7 @@ func (service *userService) FindAllActive() ([]model.User, error) {
 }
 
 func (service *userService) TrackUser(user *model.User) error {
-	existsUser, _ := service.FindUserByChatID(user.ChatID)
+	existsUser, _ := service.FindByChatID(user.ChatID)
 	if existsUser != nil {
 		// modifying and activating a previously deleted user
 		existsUser.DepartmentID = user.DepartmentID
@@ -90,7 +107,7 @@ func (service *userService) TrackUser(user *model.User) error {
 }
 
 func (service *userService) UntrackUser(chatID int64) error {
-	user, err := service.FindUserByChatID(chatID)
+	user, err := service.FindByChatID(chatID)
 	if err != nil {
 		log.Error(
 			"error when untracking a user",

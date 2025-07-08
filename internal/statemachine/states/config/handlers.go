@@ -19,8 +19,14 @@ func (state *ConfigState) Init(update *tgbotapi.Update) {
 	chatID := update.FromChat().ID
 
 	user, _ := userService.FindByChatID(chatID)
+	var redmineID int64
+	if user.RedmineID != nil {
+		redmineID = *user.RedmineID
+	} else {
+		redmineID = 0
+	}
 	userCommitSrc := fmt.Sprintf(i18n.Localize("profileCommitSrc_html"), user.CommitSrc)
-	userRedmineID := fmt.Sprintf(i18n.Localize("profileRedmineID_html"), user.RedmineID)
+	userRedmineID := fmt.Sprintf(i18n.Localize("profileRedmineID_html"), redmineID)
 
 	msg := fmt.Sprintf(""+
 		"%s\n\n"+ // Profile title
